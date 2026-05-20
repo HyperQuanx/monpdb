@@ -60,7 +60,7 @@
 
 .imagePreview {
   width: 100%;
-  aspect-ratio: 3 / 2;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
   border: 1px solid #d8ddd2;
   border-radius: 8px;
@@ -91,6 +91,7 @@
   color: #fff;
   font-size: 13px;
   font-weight: 800;
+  cursor: pointer;
   overflow: hidden;
 }
 
@@ -110,6 +111,7 @@
   color: #111;
   font-size: 13px;
   font-weight: 800;
+  cursor: pointer;
 }
 
 .editor .imageUrlField {
