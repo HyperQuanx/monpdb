@@ -1,0 +1,10 @@
+.main {
+  min-width: 0;
+  padding: var(--space-20);
+}
+
+@media (min-width: 768px) {
+  .main {
+    padding: var(--space-24);
+  }
+}

@@ -1,0 +1,145 @@
+.page {
+  display: grid;
+  gap: 18px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.eyebrow {
+  color: var(--color-muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.title {
+  margin-top: 6px;
+  color: var(--color-text);
+  font-size: 28px;
+  font-weight: 850;
+  line-height: 1.1;
+}
+
+.addButton {
+  min-height: 38px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #d8ddd2;
+  border-radius: 8px;
+  background: #111;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.addButton:focus-visible {
+  outline: 2px solid #4a5f3a;
+  outline-offset: 2px;
+}
+
+.search {
+  min-height: 46px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: #fafafa;
+  color: var(--color-muted);
+}
+
+.search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 15px;
+}
+
+.grid {
+  display: grid;
+  gap: 12px;
+}
+
+.card {
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.card:focus-visible {
+  outline: 2px solid #4a5f3a;
+  outline-offset: 2px;
+}
+
+.cardTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cardTop strong {
+  font-size: 20px;
+  font-weight: 850;
+}
+
+.cardTop span {
+  flex: 0 0 auto;
+  color: var(--color-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.meta {
+  display: grid;
+  gap: 7px;
+}
+
+.meta div {
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  gap: 8px;
+}
+
+.meta dt {
+  color: var(--color-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.meta dd {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.card p {
+  color: #444;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.state {
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  color: var(--color-muted);
+  font-size: 14px;
+}
