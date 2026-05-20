@@ -10,6 +10,14 @@
 https://qbix-portfolio.shop/api
 ```
 
+현재 프론트는 Vercel에 배포되어 있다.
+
+```txt
+Frontend URL: https://monpdb.vercel.app/
+Vercel Environment Variable:
+VITE_API_BASE_URL=https://qbix-portfolio.shop/api
+```
+
 배포 환경에서 다른 prefix가 필요하면 `VITE_API_BASE_URL`로 덮어쓰면 된다. 프론트는 이 base URL 뒤에 아래 경로를 붙여 호출한다.
 
 ## Frontend API Entrypoints
