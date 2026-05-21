@@ -4,6 +4,9 @@ export const getCharacterRegion = (regionId) =>
   characterRegions.find((region) => region.id === regionId) ??
   characterRegions[0];
 
+export const getCharacterRegionLabel = (regionId) =>
+  regionId === "미정" ? "미정" : getCharacterRegion(regionId).label;
+
 export const getCharacterRegionPath = (regionId) =>
   getCharacterRegion(regionId).path;
 

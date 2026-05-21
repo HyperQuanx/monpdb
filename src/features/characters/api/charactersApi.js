@@ -1,4 +1,4 @@
-const defaultApiBaseUrl = "https://qbix-portfolio.shop/api";
+const defaultApiBaseUrl = "https://qbix-portfolio.shop:8443/api";
 const apiBaseUrl = (
   import.meta.env.VITE_API_BASE_URL || defaultApiBaseUrl
 ).replace(/\/+$/, "");

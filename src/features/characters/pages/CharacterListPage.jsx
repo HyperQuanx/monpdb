@@ -4,8 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Plus, Search } from "lucide-react";
 import { getCharacters } from "../api/charactersApi";
 import {
-  getCharacterRegion,
   getCharacterRegionFromPathname,
+  getCharacterRegionLabel,
   getCharacterSpecies,
 } from "../characters";
 import styles from "./CharacterListPage.module.css";
@@ -74,7 +74,7 @@ function CharacterListPage() {
                 <strong>{character.name}</strong>
                 <span>
                   {character.regionName ??
-                    getCharacterRegion(character.regionId).label}
+                    getCharacterRegionLabel(character.regionId)}
                 </span>
               </div>
               <dl className={styles.meta}>
