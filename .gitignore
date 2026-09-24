@@ -26,3 +26,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Sensitive server info
+ai_read/SERVER_INFO.md
+
