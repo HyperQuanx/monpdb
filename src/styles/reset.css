@@ -1,4 +1,6 @@
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -10,6 +12,7 @@ body,
 
 html {
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -23,10 +26,22 @@ select {
   font: inherit;
 }
 
+button,
+select {
+  touch-action: manipulation;
+}
+
 button {
   border: 0;
   background: none;
   cursor: pointer;
+}
+
+button:disabled,
+input:disabled,
+textarea:disabled,
+select:disabled {
+  cursor: not-allowed;
 }
 
 a {
@@ -56,6 +71,19 @@ h3,
 h4,
 h5,
 h6,
-p {
+p,
+dl,
+dd {
   margin: 0;
+}
+
+fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+[hidden] {
+  display: none !important;
 }

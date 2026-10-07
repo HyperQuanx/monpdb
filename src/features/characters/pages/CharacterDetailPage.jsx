@@ -1,361 +1,185 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { useMemo } from "react";
+import { Link, useOutletContext, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import TextareaAutosize from "react-textarea-autosize";
 import {
-  getCharacter,
-  updateCharacter,
-  uploadCharacterImage,
-} from "../api/charactersApi";
+  characterEditPath,
+  characterListPath,
+} from "../../../app/paths";
 import {
-  characterGenderOptions,
-  characterSpeciesOptions,
-  getCharacterCoverImage,
-  getCharacterRegionFromPathname,
-  getCharacterSpecies,
-  getProfileFields,
-  profileDraftKeys,
-} from "../characters";
+  characterQueryKeys,
+  characterRepository,
+  menuQueryKeys,
+  menuRepository,
+  relationQueryKeys,
+  relationRepository,
+} from "../../../data/repositories/appRepositories";
+import { Button, Skeleton } from "../../../shared/ui";
+import {
+  getReadableTextColor,
+  sameEndpoint,
+} from "../characterForm";
+import CharacterPortrait from "../components/CharacterPortrait";
 import styles from "./CharacterDetailPage.module.css";
 
-const defaultProfileTheme = {
-  labelBackground: "#111111",
-  labelText: "#ffffff",
-  autoText: true,
-};
+const displayValue = (value) => value || "-";
+const endpointKey = (endpoint) =>
+  endpoint ? JSON.stringify([endpoint.type, endpoint.id]) : "";
+const isAllRegion = (menuItem) =>
+  menuItem.id === "characters00" || menuItem.filterConfig?.scope === "all";
 
-const displayValue = (value) => {
-  if (Array.isArray(value)) {
-    return value.length > 0 ? value.join(", ") : "-";
-  }
-
-  return value || "-";
-};
-
-const getEditableValue = (value) => {
-  if (Array.isArray(value)) {
-    return value.join(", ");
-  }
-
-  return value ?? "";
-};
-
-const getProfileDraft = (character) => {
-  const species = getCharacterSpecies(character);
-
-  return {
-    ...Object.fromEntries(
-      profileDraftKeys.map((key) => [key, getEditableValue(character[key])]),
-    ),
-    species,
-    gender:
-      species === "인간" ? character.gender || "남" : character.gender || "",
-    type: character.type || (species === "마물" ? "마물" : ""),
-  };
-};
-
-const getProfileUpdatePayload = (profileDraft, profileTheme) => {
-  const species = profileDraft.species === "마물" ? "마물" : "인간";
-
-  return {
-    ...profileDraft,
-    species,
-    gender: species === "인간" ? profileDraft.gender || "남" : "",
-    type: species === "마물" ? profileDraft.type || "마물" : "",
-    profileTheme,
-  };
-};
-
-const getReadableTextColor = (backgroundColor) => {
-  const hex = backgroundColor.replace("#", "");
-  const normalized =
-    hex.length === 3
-      ? hex
-          .split("")
-          .map((value) => value + value)
-          .join("")
-      : hex;
-
-  const red = Number.parseInt(normalized.slice(0, 2), 16);
-  const green = Number.parseInt(normalized.slice(2, 4), 16);
-  const blue = Number.parseInt(normalized.slice(4, 6), 16);
-  const brightness = (red * 299 + green * 587 + blue * 114) / 1000;
-
-  return brightness > 150 ? "#111111" : "#ffffff";
-};
-
-function CharacterDetailPage() {
-  const { pathname } = useLocation();
-  const { characterId } = useParams();
-  const region = getCharacterRegionFromPathname(pathname);
-
-  const characterQuery = useQuery({
-    queryKey: ["character", characterId],
-    queryFn: () => getCharacter(characterId),
-    enabled: Boolean(characterId),
-    retry: false,
-  });
-
-  const character = characterQuery.data;
-
-  if (characterQuery.isLoading) {
-    return <p className={styles.state}>캐릭터를 불러오는 중입니다.</p>;
-  }
-
-  if (characterQuery.isError || !character) {
-    return (
-      <section className={styles.state}>
-        <p>캐릭터를 찾을 수 없습니다.</p>
-        <Link to={region.path}>목록으로 돌아가기</Link>
-      </section>
-    );
-  }
+function RelationList({ candidates, relations, source, type }) {
+  const labels = new Map(
+    candidates.map((candidate) => [endpointKey(candidate.endpoint), candidate.label]),
+  );
+  const visibleRelations = relations.filter((relation) =>
+    type === "outgoing"
+      ? sameEndpoint(relation.source, source)
+      : !sameEndpoint(relation.source, source),
+  );
 
   return (
-    <CharacterDetailContent
-      character={character}
-      key={character.id}
-      region={region}
-    />
+    <section className={styles.relations} aria-labelledby={`${type}-relations`}>
+      <h3 id={`${type}-relations`}>
+        {type === "outgoing" ? "나가는 관계" : "들어오는 관계"}
+      </h3>
+      {visibleRelations.length === 0 ? (
+        <p>연결된 관계가 없습니다.</p>
+      ) : (
+        <ul>
+          {visibleRelations.map((relation) => {
+            const other = type === "outgoing" ? relation.target : relation.source;
+            return (
+              <li key={relation.id}>
+                <strong>{labels.get(endpointKey(other)) ?? "알 수 없는 항목"}</strong>
+                <span>{relation.label} · {relation.relationType}</span>
+                {relation.notes ? <small>{relation.notes}</small> : null}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
   );
 }
 
-function CharacterDetailContent({ character, region }) {
+function CharacterDetailContent({
+  candidates,
+  character,
+  menuItem,
+  menuItems,
+  repository,
+  relationRecords,
+  workId,
+}) {
   const queryClient = useQueryClient();
-  const baseTheme = useMemo(
-    () => ({
-      ...defaultProfileTheme,
-      ...character.profileTheme,
-    }),
-    [character.profileTheme],
+  const source = useMemo(
+    () => ({ type: character.resourceType, id: character.id }),
+    [character.id, character.resourceType],
   );
-  const [isEditing, setIsEditing] = useState(false);
-  const [profileDraft, setProfileDraft] = useState(() =>
-    getProfileDraft(character),
-  );
-  const [profileTheme, setProfileTheme] = useState(baseTheme);
-  const [selectedImageFile, setSelectedImageFile] = useState(null);
-  const [imagePreviewUrl, setImagePreviewUrl] = useState("");
-  const visibleCharacter = isEditing
-    ? {
-        ...character,
-        ...profileDraft,
-      }
-    : character;
-  const profileFields = getProfileFields(visibleCharacter);
-  const portraitSrc = imagePreviewUrl || getCharacterCoverImage(visibleCharacter);
-  const labelTextColor = profileTheme.autoText
+  const regionLabel =
+    menuItems.find((item) => item.id === character.regionId)?.label ??
+    character.regionName ??
+    character.regionId;
+  const profileTheme = character.profileTheme;
+  const labelText = profileTheme.autoText
     ? getReadableTextColor(profileTheme.labelBackground)
     : profileTheme.labelText;
+  const branchField =
+    character.species === "마물"
+      ? ["type", "마물 구분"]
+      : ["gender", "성별"];
+  const profileFields = [
+    ["regionId", "지역", regionLabel],
+    ["name", "이름", character.name],
+    ["hanjaName", "한자 이름", character.hanjaName],
+    ["englishName", "영문 이름", character.englishName],
+    ["imageUrl", "이미지 URL", character.imageUrl],
+    ["species", "종족", character.species],
+    ["birthplace", "출생지", character.birthplace],
+    [branchField[0], branchField[1], character[branchField[0]]],
+    ["birthDate", "생년월일", character.birthDate],
+    ["age", "나이", character.age],
+    ["height", "키", character.height],
+    ["weight", "몸무게", character.weight],
+    ["occupation", "직업", character.occupation],
+    ["alignment", "성향", character.alignment],
+    ["affiliation", "소속", character.affiliation],
+    ["faction", "파벌", character.faction],
+    ["likes", "선호", character.likes],
+    ["dislikes", "비호", character.dislikes],
+    ["martialArts", "무공, 특성", character.martialArts],
+    ["personality", "성격", character.personality],
+    ["appearance", "외형", character.appearance],
+    ["themeSong", "테마곡", character.themeSong],
+    ["summary", "요약", character.summary],
+    ["notes", "특이사항", character.notes],
+    ["labelBackground", "라벨 배경색", profileTheme.labelBackground],
+    ["labelText", "라벨 글자색", profileTheme.labelText],
+    ["autoText", "글자색 자동 선택", profileTheme.autoText ? "사용" : "사용 안 함"],
+  ];
 
-  useEffect(() => {
-    if (!imagePreviewUrl) {
-      return undefined;
-    }
-
-    return () => {
-      URL.revokeObjectURL(imagePreviewUrl);
-    };
-  }, [imagePreviewUrl]);
-
-  const updateCharacterMutation = useMutation({
-    mutationFn: async ({ updates, imageFile }) => {
-      const nextUpdates = { ...updates };
-
-      if (imageFile) {
-        nextUpdates.imageUrl = await uploadCharacterImage(imageFile);
-      }
-
-      return updateCharacter(character.id, nextUpdates);
-    },
-    onSuccess: (updatedCharacter) => {
-      queryClient.setQueryData(["character", character.id], updatedCharacter);
-      queryClient.invalidateQueries({ queryKey: ["characters"] });
-      setProfileDraft(getProfileDraft(updatedCharacter));
-      setProfileTheme({
-        ...defaultProfileTheme,
-        ...updatedCharacter.profileTheme,
-      });
-      setSelectedImageFile(null);
-      setImagePreviewUrl("");
-      setIsEditing(false);
+  const archiveMutation = useMutation({
+    mutationFn: () =>
+      character.archivedAt
+        ? repository.restore(workId, character.id)
+        : repository.archive(workId, character.id),
+    onSuccess: async (updatedCharacter) => {
+      queryClient.setQueryData(
+        characterQueryKeys.detail(workId, character.id),
+        updatedCharacter,
+      );
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: characterQueryKeys.all(workId) }),
+        queryClient.invalidateQueries({ queryKey: relationQueryKeys.all(workId) }),
+      ]);
     },
   });
 
-  const handleEditToggle = () => {
-    if (isEditing) {
-      setProfileDraft(getProfileDraft(character));
-      setProfileTheme(baseTheme);
-      setSelectedImageFile(null);
-      setImagePreviewUrl("");
-      setIsEditing(false);
-      return;
-    }
-
-    setIsEditing(true);
-  };
-
-  const handleDraftChange = (key, value) => {
-    setProfileDraft((current) => ({
-      ...current,
-      [key]: value,
-      ...(key === "species" && value === "마물" && !current.type
-        ? { type: "마물" }
-        : {}),
-      ...(key === "species" && value === "인간" && !current.gender
-        ? { gender: "남" }
-        : {}),
-    }));
-  };
-
-  const handleImageFileChange = (file) => {
-    if (!file) {
-      return;
-    }
-
-    setSelectedImageFile(file);
-    setImagePreviewUrl(URL.createObjectURL(file));
-  };
-
-  const handleImageClear = () => {
-    setSelectedImageFile(null);
-    setImagePreviewUrl("");
-    handleDraftChange("imageUrl", "");
-  };
-
-  const handleSave = () => {
-    updateCharacterMutation.mutate({
-      updates: getProfileUpdatePayload(profileDraft, profileTheme),
-      imageFile: selectedImageFile,
-    });
-  };
-
-  const handleReset = () => {
-    setProfileDraft(getProfileDraft(character));
-    setProfileTheme(baseTheme);
-    setSelectedImageFile(null);
-    setImagePreviewUrl("");
-  };
-
   return (
     <article className={styles.page}>
-      <div className={styles.actions}>
-        <button
-          className={styles.editButton}
-          type="button"
-          onClick={handleEditToggle}
-        >
-          {isEditing ? "Close" : "Edit"}
-        </button>
-      </div>
-
-      {isEditing ? (
-        <section className={styles.editor} aria-label="Character editor">
-          <div className={styles.imageEditor}>
-            <span className={styles.editorLabel}>초상 이미지</span>
-            <div className={styles.imagePreview}>
-              <img src={portraitSrc} alt={`${visibleCharacter.name} 초상`} />
-            </div>
-            <div className={styles.imageActions}>
-              <label className={styles.fileButton}>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(event) =>
-                    handleImageFileChange(event.target.files?.[0])
-                  }
-                />
-                <span>파일 선택</span>
-              </label>
-              <button type="button" onClick={handleImageClear}>
-                비우기
-              </button>
-            </div>
-            <label className={styles.imageUrlField}>
-              <span>이미지 URL</span>
-              <input
-                value={profileDraft.imageUrl}
-                onChange={(event) =>
-                  handleDraftChange("imageUrl", event.target.value)
-                }
-              />
-            </label>
-          </div>
-
-          <label>
-            <span>표 제목 배경</span>
-            <input
-              type="color"
-              value={profileTheme.labelBackground}
-              onChange={(event) =>
-                setProfileTheme((current) => ({
-                  ...current,
-                  labelBackground: event.target.value,
-                }))
-              }
-            />
-          </label>
-
-          <label className={styles.checkLabel}>
-            <input
-              type="checkbox"
-              checked={profileTheme.autoText}
-              onChange={(event) =>
-                setProfileTheme((current) => ({
-                  ...current,
-                  autoText: event.target.checked,
-                }))
-              }
-            />
-            <span>글씨 색 자동 선택</span>
-          </label>
-
-          {!profileTheme.autoText ? (
-            <label>
-              <span>표 제목 글씨</span>
-              <input
-                type="color"
-                value={profileTheme.labelText}
-                onChange={(event) =>
-                  setProfileTheme((current) => ({
-                    ...current,
-                    labelText: event.target.value,
-                  }))
-                }
-              />
-            </label>
-          ) : null}
-
-          <div className={styles.editorActions}>
-            <button
-              type="button"
-              disabled={updateCharacterMutation.isPending}
-              onClick={handleSave}
-            >
-              {updateCharacterMutation.isPending ? "Saving" : "Save"}
-            </button>
-            <button type="button" onClick={handleReset}>
-              Reset
-            </button>
-          </div>
-
-          {updateCharacterMutation.isError ? (
-            <p className={styles.editorError}>저장하지 못했습니다.</p>
-          ) : null}
-        </section>
+      {character.archivedAt ? (
+        <div className={styles.archivedBanner} role="status">
+          <span>보관된 캐릭터입니다.</span>
+          <Button
+            disabled={archiveMutation.isPending}
+            size="small"
+            variant="secondary"
+            onClick={() => archiveMutation.mutate()}
+          >
+            복원
+          </Button>
+        </div>
       ) : null}
+
+      <div className={styles.actions}>
+        {!character.archivedAt ? (
+          <Button
+            as={Link}
+            size="small"
+            to={characterEditPath(workId, menuItem.id, character.id)}
+          >
+            편집
+          </Button>
+        ) : null}
+        {!character.archivedAt ? (
+          <Button
+            disabled={archiveMutation.isPending}
+            size="small"
+            variant="danger"
+            onClick={() => archiveMutation.mutate()}
+          >
+            보관
+          </Button>
+        ) : null}
+      </div>
 
       <div className={styles.sheet}>
         <header className={styles.nameHeader}>
-          <h2>{visibleCharacter.name}</h2>
-          <p>
-            {displayValue(visibleCharacter.hanjaName)} |{" "}
-            {displayValue(visibleCharacter.englishName)}
-          </p>
+          <h2>{character.name}</h2>
+          <p>{displayValue(character.hanjaName)} | {displayValue(character.englishName)}</p>
         </header>
-
         <div className={styles.portraitFrame}>
-          <img src={portraitSrc} alt={`${visibleCharacter.name} 초상`} />
+          <CharacterPortrait character={character} />
         </div>
       </div>
 
@@ -363,75 +187,129 @@ function CharacterDetailContent({ character, region }) {
         className={styles.profileTable}
         style={{
           "--profile-label-bg": profileTheme.labelBackground,
-          "--profile-label-text": labelTextColor,
+          "--profile-label-text": labelText,
         }}
       >
-        {profileFields.map(([key, label]) => (
+        {profileFields.map(([key, label, value]) => (
           <div className={styles.profileRow} key={key}>
             <dt>{label}</dt>
-            <dd>
-              {isEditing ? (
-                renderProfileEditor({
-                  keyName: key,
-                  label,
-                  value: profileDraft[key] ?? "",
-                  onChange: handleDraftChange,
-                })
-              ) : (
-                displayValue(visibleCharacter[key])
-              )}
-            </dd>
+            <dd>{displayValue(value)}</dd>
           </div>
         ))}
       </dl>
 
-      <Link className={styles.backLink} to={region.path}>
-        {region.label} 목록으로
+      <div className={styles.relationGrid}>
+        <RelationList
+          candidates={candidates}
+          relations={relationRecords}
+          source={source}
+          type="outgoing"
+        />
+        <RelationList
+          candidates={candidates}
+          relations={relationRecords}
+          source={source}
+          type="incoming"
+        />
+      </div>
+
+      {archiveMutation.isError ? (
+        <p className={styles.inlineError} role="alert">
+          보관 상태를 변경하지 못했습니다.
+        </p>
+      ) : null}
+
+      <Link className={styles.backLink} to={characterListPath(workId, menuItem.id)}>
+        {menuItem.label} 목록으로
       </Link>
     </article>
   );
 }
 
-function renderProfileEditor({ keyName, label, value, onChange }) {
-  if (keyName === "species") {
+function CharacterDetailPage({
+  menus = menuRepository,
+  relations = relationRepository,
+  repository = characterRepository,
+}) {
+  const { menuItem } = useOutletContext();
+  const { characterId, workId } = useParams();
+  const characterQuery = useQuery({
+    enabled: Boolean(characterId),
+    networkMode: "always",
+    queryKey: characterQueryKeys.detail(workId, characterId),
+    queryFn: () => repository.get(workId, characterId),
+    retry: false,
+  });
+  const menuItemsQuery = useQuery({
+    networkMode: "always",
+    queryKey: menuQueryKeys.items("characters", true),
+    queryFn: () => menus.listItems("characters", { includeArchived: true }),
+    retry: false,
+  });
+  const character = characterQuery.data;
+  const matchesRegion = character
+    ? isAllRegion(menuItem) || character.regionId === menuItem.id
+    : false;
+  const source = useMemo(
+    () => character
+      ? { type: character.resourceType, id: character.id }
+      : undefined,
+    [character],
+  );
+  const relationsQuery = useQuery({
+    enabled: Boolean(source && matchesRegion),
+    networkMode: "always",
+    queryKey: relationQueryKeys.list(workId, source),
+    queryFn: () => relations.list(workId, source),
+    retry: false,
+  });
+  const candidatesQuery = useQuery({
+    enabled: Boolean(source && matchesRegion),
+    networkMode: "always",
+    queryKey: relationQueryKeys.candidates(workId, undefined),
+    queryFn: () => relations.listCandidates(workId),
+    retry: false,
+  });
+  const loading =
+    characterQuery.isPending ||
+    menuItemsQuery.isPending ||
+    (matchesRegion && (relationsQuery.isPending || candidatesQuery.isPending));
+  const failed =
+    characterQuery.isError ||
+    menuItemsQuery.isError ||
+    relationsQuery.isError ||
+    candidatesQuery.isError;
+
+  if (loading) {
     return (
-      <select
-        aria-label={label}
-        value={value}
-        onChange={(event) => onChange(keyName, event.target.value)}
-      >
-        {characterSpeciesOptions.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
+      <div aria-live="polite" className={styles.state} role="status">
+        <Skeleton className={styles.loadingSkeleton} />
+        <span>캐릭터를 불러오는 중입니다.</span>
+      </div>
     );
   }
 
-  if (keyName === "gender") {
+  if (failed || !character || !matchesRegion) {
     return (
-      <select
-        aria-label={label}
-        value={value}
-        onChange={(event) => onChange(keyName, event.target.value)}
-      >
-        {characterGenderOptions.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
+      <section className={styles.state} role="alert">
+        <p>현재 지역에서 캐릭터를 찾을 수 없습니다.</p>
+        <Link to={characterListPath(workId, menuItem.id)}>
+          {menuItem.label} 목록으로
+        </Link>
+      </section>
     );
   }
 
   return (
-    <TextareaAutosize
-      aria-label={label}
-      minRows={2}
-      maxRows={8}
-      value={value}
-      onChange={(event) => onChange(keyName, event.target.value)}
+    <CharacterDetailContent
+      candidates={candidatesQuery.data ?? []}
+      character={character}
+      key={`${character.id}:${character.version}`}
+      menuItem={menuItem}
+      menuItems={menuItemsQuery.data ?? []}
+      relationRecords={relationsQuery.data ?? []}
+      repository={repository}
+      workId={workId}
     />
   );
 }

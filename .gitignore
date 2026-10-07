@@ -13,6 +13,7 @@ lerna-debug.log*
 
 node_modules
 dist
+dist-*
 dist-ssr
 *.local
 
@@ -30,3 +31,7 @@ dist-ssr
 # Sensitive server info
 ai_read/SERVER_INFO.md
 
+# Generated test output
+coverage/
+playwright-report/
+test-results/

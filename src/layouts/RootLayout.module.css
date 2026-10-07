@@ -1,9 +1,30 @@
 .shell {
-  width: 100%;
-  max-width: var(--app-max-width);
+  width: min(100%, var(--app-max-width));
+  min-height: 100vh;
+  min-height: 100svh;
   min-height: 100dvh;
   margin: 0 auto;
   display: grid;
   grid-template-rows: auto 1fr;
-  background: var(--color-surface);
+  background: var(--color-background-elevated);
+}
+
+.body {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .body:has(> aside) {
+    grid-template-columns: var(--sidebar-width, 268px) minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .shell {
+    border-inline: 1px solid rgb(29 29 31 / 6%);
+    box-shadow: 0 0 70px rgb(0 0 0 / 5%);
+  }
 }

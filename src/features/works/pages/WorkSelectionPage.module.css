@@ -1,0 +1,190 @@
+.page {
+  width: min(100%, var(--app-max-width));
+  min-height: 100vh;
+  min-height: 100svh;
+  margin: 0 auto;
+  padding:
+    calc(clamp(32px, 8vw, 88px) + var(--safe-area-top))
+    max(var(--app-gutter), var(--safe-area-right))
+    calc(clamp(40px, 8vw, 96px) + var(--safe-area-bottom))
+    max(var(--app-gutter), var(--safe-area-left));
+  display: grid;
+  align-content: start;
+  gap: clamp(32px, 7vw, 72px);
+}
+
+.hero {
+  max-width: 760px;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.brand {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-accent);
+  font-weight: 750;
+  letter-spacing: -0.03em;
+}
+
+.brand img {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  box-shadow: var(--shadow-control);
+}
+
+.eyebrow,
+.genre {
+  color: var(--color-accent);
+  font-size: var(--font-size-caption);
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  max-width: 720px;
+  font-size: clamp(2.25rem, 8vw, 5rem);
+  font-weight: 760;
+  letter-spacing: -0.065em;
+  line-height: 0.98;
+}
+
+.intro {
+  max-width: 640px;
+  color: var(--color-text-secondary);
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  line-height: 1.65;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: clamp(16px, 3vw, 28px);
+}
+
+.card {
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.card::before {
+  content: "";
+  height: 4px;
+  background: var(--work-accent);
+}
+
+.cover {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--work-accent) 18%, var(--color-fill-tertiary));
+}
+
+.cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.coverFallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: var(--work-accent);
+  font-size: clamp(3rem, 12vw, 6rem);
+  font-weight: 800;
+}
+
+.status {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  border: 1px solid rgb(255 255 255 / 52%);
+  border-radius: var(--radius-pill);
+  padding: 5px 10px;
+  color: #ffffff;
+  background: rgb(0 0 0 / 48%);
+  font-size: 0.75rem;
+  font-weight: 700;
+  backdrop-filter: blur(12px);
+}
+
+.content {
+  padding: clamp(18px, 4vw, 28px);
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+}
+
+.content h2 {
+  margin-top: var(--space-1);
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 740;
+  letter-spacing: -0.045em;
+}
+
+.subtitle,
+.summary {
+  color: var(--color-text-secondary);
+}
+
+.subtitle {
+  margin-top: var(--space-1);
+  font-size: 0.9375rem;
+}
+
+.summary {
+  min-height: 3.2em;
+  line-height: 1.6;
+}
+
+.content button {
+  width: 100%;
+  margin-top: auto;
+}
+
+.loading,
+.error,
+.empty {
+  min-height: 220px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+.loading,
+.error {
+  display: grid;
+  place-items: center;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  color: var(--color-text-secondary);
+}
+
+.loadingCover {
+  width: min(100%, 320px);
+  height: 120px;
+}
+
+.error {
+  color: var(--color-danger);
+  font-weight: 650;
+}
+
+@supports not (background: color-mix(in srgb, white, black)) {
+  .cover {
+    background: var(--color-fill-secondary);
+  }
+}
+
+@media (min-width: 760px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

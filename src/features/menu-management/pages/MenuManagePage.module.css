@@ -1,0 +1,288 @@
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  gap: clamp(24px, 5vw, 44px);
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.header > div {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.eyebrow {
+  color: var(--color-accent);
+  font-size: var(--font-size-caption);
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.header h2 {
+  font-size: var(--font-size-title);
+  letter-spacing: -0.05em;
+}
+
+.header p:not(.eyebrow) {
+  color: var(--color-text-secondary);
+}
+
+.createSection,
+.itemCreate,
+.editor {
+  padding: var(--space-4);
+  display: grid;
+  gap: var(--space-3);
+}
+
+.createSection {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+}
+
+.createSection label,
+.itemCreate label,
+.editor label {
+  display: grid;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 680;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.72fr) minmax(0, 1.28fr);
+  align-items: start;
+  gap: var(--space-5);
+}
+
+.sectionPanel,
+.itemPanel,
+.archivePanel {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.sectionPanel h3,
+.itemPanel h3,
+.archivePanel h3 {
+  font-size: 1.125rem;
+}
+
+.rows {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.row {
+  min-width: 0;
+  padding: var(--space-3);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.row[draggable="true"] {
+  cursor: grab;
+}
+
+.row[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+.selectButton {
+  min-height: var(--control-min-height);
+  overflow: hidden;
+  border-radius: var(--radius-control);
+  padding: 0 var(--space-2);
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemName {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.itemName strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemName span {
+  color: var(--color-text-tertiary);
+  font-size: 0.75rem;
+}
+
+.rowActions,
+.editorActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-1);
+}
+
+.itemCreate {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.itemCreate label:last-of-type {
+  grid-column: 1 / -1;
+}
+
+.itemCreate select {
+  min-height: var(--control-min-height);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  padding: 0 var(--space-3);
+  background: var(--color-surface);
+  font-size: 1rem;
+}
+
+.itemCreate button {
+  grid-column: 1 / -1;
+  justify-self: end;
+}
+
+.editorActions {
+  align-items: end;
+}
+
+.archivePanel {
+  border-top: 1px solid var(--color-border-subtle);
+  padding-top: var(--space-5);
+}
+
+.archiveRow {
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.archiveRow > div {
+  display: grid;
+}
+
+.archiveRow span {
+  color: var(--color-text-tertiary);
+  font-size: 0.75rem;
+}
+
+.loading {
+  min-height: 160px;
+  display: grid;
+  place-items: center;
+  gap: var(--space-3);
+}
+
+.loadingLine {
+  width: min(100%, 260px);
+  height: 18px;
+}
+
+.error {
+  color: var(--color-danger);
+  font-weight: 650;
+}
+
+.announcement {
+  min-height: 1.5em;
+  color: var(--color-accent);
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+@media (max-width: 800px) {
+  .header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .createSection,
+  .itemCreate,
+  .editor {
+    grid-template-columns: 1fr;
+  }
+
+  .row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .rowActions {
+    grid-column: 1 / -1;
+  }
+}
+
+.fieldset {
+  grid-column: 1 / -1;
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-3);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-control);
+}
+
+.fieldset legend {
+  padding: 0 var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.itemCreate .checkboxLabel,
+.editor .checkboxLabel {
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  display: inline-flex;
+  grid-column: auto;
+  align-items: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-control);
+  color: var(--color-text-primary);
+  background: var(--color-fill-tertiary);
+  font-size: 1rem;
+}
+
+.checkboxLabel input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--color-accent);
+}
+
+.checkboxLabel:focus-within {
+  outline: 3px solid rgb(20 125 100 / 18%);
+  outline-offset: 2px;
+}
+
+.typeNote {
+  grid-column: 1 / -1;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}

@@ -1,0 +1,43 @@
+.root {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.progress {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+}
+
+.list {
+  display: grid;
+  gap: 2px;
+  list-style: none;
+}
+
+.item {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.item input {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  accent-color: var(--color-accent);
+}
+
+.item:focus-within {
+  border-radius: var(--radius-control);
+  outline: 3px solid rgb(20 125 100 / 18%);
+  outline-offset: 2px;
+}
+
+.done {
+  color: var(--color-text-tertiary);
+  text-decoration: line-through;
+}

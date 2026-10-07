@@ -1,0 +1,124 @@
+.backdrop {
+  position: fixed;
+  z-index: var(--z-modal, 1000);
+  inset: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+  padding: 0;
+  background: rgb(0 0 0 / 36%);
+  backdrop-filter: blur(10px);
+  animation: backdrop-in var(--duration-standard, 220ms) ease both;
+}
+
+.panel {
+  position: relative;
+  max-width: 100%;
+  color: var(--color-text-primary, #1d1d1f);
+  background: var(--color-surface, #ffffff);
+  background: color-mix(in srgb, var(--color-surface, #ffffff) 94%, transparent);
+  box-shadow: -18px 0 48px rgb(0 0 0 / 16%);
+  outline: none;
+}
+
+.sheet {
+  width: min(100%, 430px);
+  height: 100%;
+  animation: sheet-in var(--duration-standard, 220ms)
+    var(--ease-emphasized, cubic-bezier(0.32, 0.72, 0, 1)) both;
+}
+
+.sheetHeader,
+.dialogHeader {
+  min-height: calc(64px + var(--safe-area-top, 0px));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4, 16px);
+  border-bottom: 1px solid var(--color-border-subtle, #e5e5e7);
+}
+
+.sheetHeader {
+  padding: var(--safe-area-top, 0px) var(--space-4, 16px) 0;
+}
+
+.sheetHeader h2,
+.dialogHeader h2 {
+  margin: 0;
+  font-size: 1.125rem;
+  letter-spacing: -0.025em;
+}
+
+.closeButton {
+  width: var(--control-min-height, 44px);
+  height: var(--control-min-height, 44px);
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: var(--color-text-secondary, #515154);
+  background: var(--color-fill-tertiary, #f5f5f7);
+  cursor: pointer;
+}
+
+.sheetBody {
+  height: calc(100% - 64px - var(--safe-area-top, 0px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-4, 16px) var(--space-4, 16px)
+    calc(var(--space-6, 24px) + var(--safe-area-bottom, 0px));
+  -webkit-overflow-scrolling: touch;
+}
+
+.dialog {
+  width: min(calc(100% - 32px), 480px);
+  align-self: center;
+  margin: auto;
+  border-radius: var(--radius-card, 20px);
+  box-shadow: var(--shadow-modal, 0 24px 80px rgb(0 0 0 / 24%));
+  animation: dialog-in var(--duration-standard, 220ms)
+    var(--ease-emphasized, cubic-bezier(0.32, 0.72, 0, 1)) both;
+}
+
+.dialogHeader {
+  padding: var(--space-4, 16px) var(--space-4, 16px) var(--space-3, 12px)
+    var(--space-5, 20px);
+}
+
+.dialogHeader p {
+  margin: 4px 0 0;
+  color: var(--color-text-secondary, #515154);
+  line-height: 1.5;
+}
+
+.dialogBody {
+  padding: var(--space-5, 20px);
+}
+
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .sheet,
+  .dialog {
+    animation-duration: 0.01ms;
+  }
+}

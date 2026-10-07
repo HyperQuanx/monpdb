@@ -1,0 +1,15 @@
+.loading {
+  min-height: 100dvh;
+  padding: calc(var(--safe-area-top, 0px) + var(--space-6)) var(--space-6);
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-3);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.line {
+  width: min(70vw, 240px);
+  height: 18px;
+}

@@ -1,310 +1,105 @@
 .header {
   position: sticky;
-  top: 0;
   z-index: var(--z-header);
-  background: var(--color-surface);
-}
-
-.headerOpen {
-  z-index: calc(var(--z-header) + 10);
+  top: 0;
+  border-bottom: 1px solid rgb(29 29 31 / 8%);
+  background: var(--color-surface-translucent);
+  backdrop-filter: saturate(180%) blur(20px);
 }
 
 .inner {
-  min-height: var(--header-height);
-  padding: 0 var(--space-16);
+  width: min(100%, var(--app-max-width));
+  min-height: calc(var(--header-height) + var(--safe-area-top));
+  margin: 0 auto;
+  padding:
+    var(--safe-area-top)
+    max(var(--app-gutter), var(--safe-area-right))
+    0
+    max(var(--app-gutter), var(--safe-area-left));
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto) minmax(0, 1fr);
   align-items: center;
-  gap: var(--space-12);
+  gap: var(--space-3);
 }
 
 .brand {
   min-width: 0;
+  width: fit-content;
+  min-height: var(--control-min-height);
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--space-2);
+  border-radius: var(--radius-control);
 }
 
 .brandIcon {
-  width: 24px;
-  height: 24px;
-  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border-radius: 9px;
   object-fit: cover;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 18%);
 }
 
 .brandText {
   overflow: hidden;
-  color: #4a5f3a;
-  font-size: 15px;
-  font-weight: 800;
+  color: var(--work-accent, var(--color-accent));
+  font-size: 0.9375rem;
+  font-weight: 780;
   letter-spacing: -0.04em;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .title {
-  color: var(--color-text);
-  font-size: 17px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1;
+  max-width: min(52vw, 34rem);
+  overflow: hidden;
+  color: var(--color-text-primary);
+  font-size: clamp(0.9375rem, 2.5vw, 1.125rem);
+  font-weight: 720;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .menuButton {
-  width: 40px;
-  height: 40px;
+  justify-self: end;
   margin-left: auto;
-  display: inline-flex;
+  padding: 0;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   gap: 6px;
-  border-radius: 14px;
-  color: var(--color-text);
+  border-radius: 50%;
+  color: var(--color-text-primary);
 }
 
-.menuButton:active {
-  background: #f2f2f2;
+.menuButton:hover {
+  background: var(--color-fill-secondary);
+  transform: none;
 }
 
 .menuLine {
-  width: 18px;
+  width: 19px;
   height: 2px;
   display: block;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: currentcolor;
-  transform-origin: center;
-  transition:
-    transform 260ms cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 180ms ease;
 }
 
-.menuButtonOpen .menuLine:first-child {
-  transform: translateY(4px) rotate(45deg);
-}
-
-.menuButtonOpen .menuLine:last-child {
-  transform: translateY(-4px) rotate(-45deg);
-}
-
-.drawer {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  height: calc(100dvh - var(--header-height));
-  overflow: hidden;
-  visibility: hidden;
-  pointer-events: none;
-  background: rgba(255, 255, 255, 0);
-  transform: translateY(-8px);
-  opacity: 0;
-  transition:
-    opacity 260ms ease,
-    transform 320ms cubic-bezier(0.16, 1, 0.3, 1),
-    visibility 0s linear 320ms,
-    background 260ms ease;
-}
-
-.drawerOpen {
-  visibility: visible;
-  pointer-events: auto;
-  background: rgba(255, 255, 255, 0.96);
-  transform: translateY(0);
-  opacity: 1;
-  transition:
-    opacity 220ms ease,
-    transform 360ms cubic-bezier(0.16, 1, 0.3, 1),
-    visibility 0s,
-    background 220ms ease;
-}
-
-.drawerPanel {
-  min-height: 100%;
-  padding: 22px var(--space-16) 32px;
-  background: var(--color-surface);
-  transform-origin: top;
-  animation: drawerPanelIn 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.menuList {
-  display: grid;
-  gap: 6px;
-}
-
-.menuSection {
-  border-bottom: 1px solid var(--color-border);
-  opacity: 0;
-  transform: translateY(12px);
-  animation: menuItemIn 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: calc(70ms * var(--item-index));
-}
-
-.sectionTrigger {
-  width: 100%;
-  min-height: 58px;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: var(--color-text);
-  text-align: left;
-  font-size: 22px;
-  font-weight: 750;
-  letter-spacing: -0.04em;
-}
-
-.sectionIcon {
-  position: relative;
-  width: 18px;
-  height: 18px;
-  flex: 0 0 auto;
-}
-
-.sectionIcon::before,
-.sectionIcon::after {
-  content: "";
-  position: absolute;
-  inset: 8px 2px auto;
-  height: 2px;
-  border-radius: 999px;
-  background: currentcolor;
-  transition: transform 240ms ease;
-}
-
-.sectionIcon::after {
-  transform: rotate(90deg);
-}
-
-.sectionIconOpen::after {
-  transform: rotate(0deg);
-}
-
-.linkPanel {
-  display: grid;
-  grid-template-rows: 0fr;
-  opacity: 0;
-  transition:
-    grid-template-rows 320ms cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 220ms ease;
-}
-
-.linkPanelOpen {
-  grid-template-rows: 1fr;
-  opacity: 1;
-}
-
-.linkList {
-  min-height: 0;
-  overflow: hidden;
-  display: grid;
-  gap: 4px;
-  padding-bottom: 14px;
-}
-
-.menuLink {
-  position: relative;
-  width: fit-content;
-  padding: 10px 0;
-  color: var(--color-muted);
-  font-size: 16px;
-  font-weight: 650;
-  opacity: 0;
-  transform: translateX(-8px);
-}
-
-.menuLink::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 6px;
-  height: 1px;
-  background: currentcolor;
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform 260ms ease;
-}
-
-.menuLink:hover::after,
-.menuLink:focus-visible::after {
-  transform: scaleX(1);
-  transform-origin: left;
-}
-
-.linkPanelOpen .menuLink {
-  animation: menuLinkIn 280ms ease forwards;
-  animation-delay: calc(45ms * var(--link-index));
-}
-
-.emptyMenu {
-  min-height: 140px;
-  display: grid;
-  align-content: center;
-  gap: 8px;
-  color: var(--color-muted);
-  opacity: 0;
-  transform: translateY(12px);
-  animation: menuItemIn 420ms cubic-bezier(0.16, 1, 0.3, 1) 90ms forwards;
-}
-
-.emptyMenu strong {
-  color: var(--color-text);
-  font-size: 22px;
-  letter-spacing: -0.04em;
-}
-
-.emptyMenu span {
-  font-size: 14px;
-  line-height: 1.45;
-}
-
-@keyframes drawerPanelIn {
-  from {
-    transform: scaleY(0.96);
-  }
-
-  to {
-    transform: scaleY(1);
-  }
-}
-
-@keyframes menuItemIn {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes menuLinkIn {
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+.headerSpacer {
+  width: var(--control-min-height);
+  height: var(--control-min-height);
+  justify-self: end;
 }
 
 @media (min-width: 768px) {
-  .inner {
-    padding: 0 var(--space-24);
-  }
-
   .brandIcon {
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
   }
 
   .brandText {
-    font-size: 16px;
-  }
-
-  .title {
-    font-size: 20px;
-  }
-
-  .drawerPanel {
-    padding-inline: var(--space-24);
-  }
-
-  .sectionTrigger {
-    font-size: 24px;
+    font-size: 1rem;
   }
 }

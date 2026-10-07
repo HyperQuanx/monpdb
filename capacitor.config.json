@@ -1,0 +1,8 @@
+{
+  "appId": "shop.qbixportfolio.monp",
+  "appName": "MONP",
+  "webDir": "dist",
+  "ios": {
+    "contentInset": "automatic"
+  }
+}

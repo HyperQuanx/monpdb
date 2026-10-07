@@ -1,0 +1,239 @@
+.form {
+  width: 100%;
+  max-width: 900px;
+  min-width: 0;
+  margin: 0 auto;
+  padding-bottom: calc(var(--safe-area-bottom) + var(--space-6));
+  display: grid;
+  gap: var(--space-5);
+  color: var(--color-text-primary);
+}
+
+.header { min-width: 0; }
+
+.eyebrow {
+  color: var(--color-accent);
+  font-size: var(--font-size-caption);
+  font-weight: 750;
+  letter-spacing: 0.06em;
+}
+
+.header h2 {
+  margin-top: var(--space-2);
+  overflow-wrap: anywhere;
+  font-size: clamp(1.55rem, 6vw, 2.2rem);
+  letter-spacing: -0.04em;
+}
+
+.field,
+.editor,
+.relationPicker,
+.incoming { min-width: 0; }
+
+.field {
+  display: grid;
+  gap: var(--space-2);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.control,
+.textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  outline: 0;
+}
+
+.control { padding-inline: var(--space-3); }
+
+.textarea {
+  min-height: 96px;
+  padding: var(--space-3);
+  resize: vertical;
+}
+
+.control:focus-visible,
+.textarea:focus-visible {
+  border-color: var(--color-focus-ring);
+  box-shadow: 0 0 0 3px rgb(20 125 100 / 14%);
+}
+
+.fieldError,
+.formError {
+  color: var(--color-danger);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.fieldGrid,
+.listGrid {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-4);
+}
+
+.fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-4);
+  display: grid;
+  gap: var(--space-3);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+.fieldset legend {
+  padding: 0 var(--space-1);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.helper {
+  color: var(--color-text-tertiary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.checkboxGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
+  gap: var(--space-2);
+}
+
+.checkboxLabel {
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-control);
+  background: var(--color-fill-tertiary);
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.checkboxLabel input {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  accent-color: var(--color-accent);
+}
+
+.checkboxLabel:focus-within {
+  outline: 3px solid rgb(20 125 100 / 18%);
+  outline-offset: 2px;
+}
+
+.clueRow {
+  min-width: 0;
+  padding: var(--space-3);
+  display: grid;
+  gap: var(--space-3);
+  border-radius: var(--radius-control);
+  background: var(--color-fill-tertiary);
+}
+
+.clueRemove,
+.clueAdd {
+  min-height: 44px;
+  justify-self: start;
+}
+
+.incoming {
+  padding: var(--space-4);
+  display: grid;
+  gap: var(--space-2);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  overflow-wrap: anywhere;
+}
+
+.incoming h3 { font-size: 1rem; }
+
+.incoming p,
+.incoming li {
+  color: var(--color-text-secondary);
+  line-height: 1.55;
+}
+
+.incoming ul {
+  padding-left: 1.2rem;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.incoming li span { margin-left: var(--space-2); }
+
+.actions {
+  position: sticky;
+  z-index: 2;
+  bottom: calc(var(--safe-area-bottom) + var(--space-2));
+  min-width: 0;
+  padding: var(--space-2);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-control);
+  background: rgb(255 255 255 / 92%);
+  box-shadow: var(--shadow-control);
+  backdrop-filter: blur(18px);
+}
+
+.actions > * { min-height: 44px; }
+
+.state {
+  min-height: 260px;
+  padding: var(--space-6);
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: var(--space-3);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-card);
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.loadingSkeleton {
+  width: min(100%, 260px);
+  height: 18px;
+}
+
+.clueRow {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+@media (min-width: 720px) {
+  .fieldGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .listGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 480px) {
+  .actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .actions > * { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .form *, .form *::before, .form *::after {
+    scroll-behavior: auto;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

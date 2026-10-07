@@ -1,0 +1,7 @@
+/* Soft memo tints; text stays on the default text color for contrast. */
+.default { background: var(--color-surface); }
+.yellow { background: #fff6d6; }
+.green { background: #e5f5ea; }
+.blue { background: #e5effb; }
+.pink { background: #fce7ee; }
+.purple { background: #efe7fb; }

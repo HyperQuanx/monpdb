@@ -1,10 +1,19 @@
 .main {
+  width: 100%;
   min-width: 0;
-  padding: var(--space-20);
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding-top: clamp(24px, 5vw, 48px);
+  padding-right: max(var(--app-gutter), var(--safe-area-right));
+  padding-bottom: calc(
+    clamp(32px, 7vw, 72px) + var(--safe-area-bottom) +
+      var(--active-footer-height, 0px)
+  );
+  padding-left: max(var(--app-gutter), var(--safe-area-left));
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .main {
-    padding: var(--space-24);
+    padding-left: var(--app-gutter);
   }
 }
