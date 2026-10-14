@@ -14,8 +14,9 @@
 
 ## 구현 진행 현황
 
-> 마지막 갱신: 2026-10-07  
-> 현재 상태: **Phase A(Task 1~15) 완료. Task 16~19 로컬 구현·검증 완료. Task 20 배포 준비 중(운영 MiniPC 미접속·미변경). Task 21 Capacitor iOS scaffold·앱 자산 준비 중(Xcode/실기기 검증은 Mac 필요).**  
+> 마지막 갱신: 2026-10-12
+>
+> 현재 상태: **Phase A(Task 1~15) 완료. Task 16~19 구현·검증 완료. Task 20 MiniPC 직접 점검·분리 DB build/HTTP/backup restore 검증 완료, 전용 DB·systemd·Tailscale·Caddy 운영 적용 승인 대기. Task 21 Capacitor iOS scaffold·앱 자산 준비 중(Xcode/실기기 검증은 Mac 필요). 다음 환경으로 작업을 옮길 때 `CODEX_HANDOFF.md`를 먼저 읽는다.**
 > 이 섹션이 현재 구현 상태의 기준이며, 아래 `3. 현재 코드 분석 요약`은 Task 1 시작 전 초기 분석 기록이다.
 
 ### 완료된 Task
@@ -44,11 +45,14 @@
 - Capacitor Network plugin 상태를 web online/offline 이벤트와 연결했다. API fallback은 네트워크 오류·일부 5xx만 허용한다.
 - 검증: front **45 files/313 tests**, lint, fixture/HTTP build, 기존 Playwright **77/77**, HTTP browser **2/2** 통과. npm audit **0 vulnerabilities**(Capacitor CLI 취약 patch와 아이콘 tool 제거 후).
 
-#### [ ] Task 20: MiniPC deployment와 server guide (준비물 작성 완료, 서버 확인 대기)
+#### [ ] Task 20: MiniPC deployment와 server guide (2026-10-12 MiniPC 검증 완료, 운영 적용 승인 대기)
 
 - `front/ai_read/MINIPC_MONP_SERVER_GUIDE.md`에 전용 systemd service, Tailscale에서만 허용하는 Caddy host 예시, prod env, setup/rollback/backup/restore/runbook을 작성했다.
-- systemd/Caddy sample과 DB+upload dump script는 `back/deploy/`에 있다. 모두 `.example`이며 운영 서버에 복사·실행하지 않았다.
-- `SERVER_INFO.md`의 포트·주소·경로는 이전 portfolio 설정일 수 있어 현재 서버와 대조해야 한다. 실제 SSH alias/account, Tailscale 접근, DNS 이름이 확인되기 전에는 운영 점검·배포를 마치지 않는다.
+- `coke-NucBox-G3`에서 직접 확인: Ubuntu 24.04.2, Java 17.0.18, Node 22.22.1, MariaDB 10.11.14, Caddy 2.6.2. portfolio Blue 8081 active, MONP 8181 미사용, DB loopback. Tailscale/Docker 미설치이며 `sudo`는 비밀번호가 필요하다.
+- 분리 MariaDB 13316/13317에서 backend **33 tests**, frontend **313 tests**(`--maxWorkers=1`), lint, fixture/HTTP build, HTTP Playwright **2/2**, prod health/docs/CORS/restart, dump·uploads checksum·별도 DB/경로 복원 및 이미지 조회 통과.
+- 백업 중 MONP만 잠시 중지해 SQL/upload 일관성을 확보하고 실패 시 재시작하는 trap, flock, SHA256SUMS, daily timer를 추가했다. lifecycle은 mock systemctl로 검증했고 실제 운영 unit은 미설치다. shared MiniPC JVM heap을 512MiB로 제한했다.
+- `back/deploy/`에 검증 재현 스크립트, checksum 고정 최초 로컬 설치 스크립트, env와 tailnet IPv4/IPv6 Caddy 초안을 준비했다. 기존 Caddy+초안 및 staged systemd validation 통과. 운영 Caddy·DB·service·firewall·router는 변경하지 않았다.
+- 실제 frontend origin, Tailscale owner enrollment/ACL/MagicDNS FQDN과 운영 설치 승인이 필요하다. TLS·외부 노출·운영 restart/rollback·off-host 복제 검증 후 Task 20을 완료한다. [MINIPC_DEPLOYMENT_REVIEW.md](MINIPC_DEPLOYMENT_REVIEW.md)에 결과·JAR hash·적용 범위를 기록했다.
 
 #### [ ] Task 21: Capacitor iOS project와 iPhone UX (scaffold 완료, Mac 검증 필요)
 
@@ -149,7 +153,7 @@
 
 - 첫 로딩: entry `index` 240.92kB(gzip 75.59kB) + `appRepositories` 258.66kB(gzip 77.48kB), 합계 약 500kB(gzip 약 153kB). Task 14 때보다 entry가 조금 커지고(ErrorPage 등) `appRepositories`가 줄었다.
 - Tiptap `editor` chunk 422.01kB(gzip 135.19kB)는 편집·상세 화면에서만 받는다. 500kB를 넘는 파일은 없다.
-- fixture가 bundle에서 빠지는 Task 19에서 다시 측정한다.
+- 당시 측정은 Task 15 fixture build 기준이다. Task 19 HTTP adapter는 fixture repository를 읽기 보조 로직에도 사용하므로 fixture 코드가 bundle에서 빠지지 않는다.
 
 ##### Vercel preview 시연
 
@@ -530,7 +534,7 @@ git diff --check
 - **`back/`은 git 저장소 밖에 있다.** git 저장소는 `front/`(`origin` = `HyperQuanx/monpdb`)뿐이고 `monp_db_re/` 루트는 저장소가 아니다. 계획의 "저장소 루트 `back/`"와 맞지 않으므로 `back/`을 별도 저장소로 둘지, 루트 monorepo로 합칠지 사용자 결정이 필요하다(아직 아무것도 바꾸지 않음).
 - 이 개발 PC에는 Docker가 없어 Testcontainers 모드를 실행하지 못했다. Docker 설치(sudo 필요) 후 `back/`에서 `./gradlew test`를 한 번 돌려 확인한다. JDK 17은 `~/.jdks/jdk-17.0.20.1+1`에 있다.
 - fixture 이미지 파일은 세션 데이터다. HTTP 모드의 이미지 파일은 서버 upload directory에 저장하며 IndexedDB text cache에서 제외한다.
-- 첫 로딩은 entry `index`(240.92kB) + `appRepositories`(258.66kB, Zod·fixture·repository) 두 chunk로 약 500kB(gzip 약 153kB)이다. 파일 하나가 500kB를 넘지 않아 경고는 없다. Tiptap은 편집·상세 화면에서만 받는 `editor` chunk(`422kB`, gzip `135kB`)다. HTTP adapter로 바꾸면(Task 19) fixture가 빠져 첫 로딩이 줄어든다.
+- Task 15 당시 fixture build는 entry `index`(240.92kB) + `appRepositories`(258.66kB, Zod·fixture·repository) 두 chunk로 약 500kB(gzip 약 153kB)였다. 2026-10-07 재측정에서 fixture build는 `index` 211.02kB/66.92kB gzip, `appRepositories` 287.33kB/87.27kB gzip이며 HTTP build는 각각 214.34kB/68.00kB gzip, 293.61kB/89.24kB gzip이다. HTTP adapter가 fixture read adapter를 재사용하므로 fixture 코드가 bundle에 남는다. Tiptap은 편집·상세 화면에서만 받는 `editor` chunk(422.01kB/135.20kB gzip)다.
 - iOS Xcode compile/signing/device behavior는 Mac mini M4에서 확인해야 한다. 노트북은 backend와 browser smoke를 위한 분리 로컬 MariaDB로 사용했다.
 - Vercel preview 배포·시연은 사용자 확인 뒤에 진행한다. 흐름 자체는 production build E2E로 검증했다.
 - 웹 오프라인 동작은 route chunk가 받아진 뒤에 보장된다(첫 화면 이후 idle preload). HTTP 브라우저 E2E에서 새로고침 뒤 IndexedDB text fallback을 확인했다.

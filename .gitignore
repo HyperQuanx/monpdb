@@ -10,6 +10,7 @@ lerna-debug.log*
 .env
 .env.*
 !.env.example
+!.env.ios.example
 
 node_modules
 dist

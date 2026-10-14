@@ -1,6 +1,6 @@
 # MONP MiniPC 서버 준비 안내
 
-이 문서는 MONP 배포를 위한 **검토 가능한 초안**이다. `SERVER_INFO.md`는 포트폴리오 서버 구성을 설명하지만, 호스트 상태·DNS·SSH 계정·현재 Caddy 설정을 검증한 값은 아니다. 예시를 운영 서버에 복사하기 전에 MiniPC에서 현재 설정을 확인한다. 이 프로젝트는 포트폴리오 서비스 파일이나 DB를 수정하지 않는다.
+이 문서는 MONP 배포를 위한 **검토 가능한 초안**이다. 2026-10-12에 `coke-NucBox-G3`에 직접 접속해 OS·서비스·포트·Caddy 구성을 확인하고 분리 DB에서 검증했다. 실제 DB/user·systemd·Caddy 설치는 아직 하지 않았다. 상세 결과는 [MINIPC_DEPLOYMENT_REVIEW.md](MINIPC_DEPLOYMENT_REVIEW.md)를 참고한다. `SERVER_INFO.md`의 과거 값 중 Java 버전과 소스 경로는 현재와 다르다.
 
 ## 배포 구성
 
@@ -8,8 +8,29 @@
 - 전용 `monp` OS 사용자와 `/etc/monp/monp-api.env` 환경 파일을 쓴다. 업로드 디렉터리는 `/var/lib/monp-api/uploads`다.
 - MariaDB에 전용 `monp` DB와 최소 권한 계정을 만든다. 기존 portfolio DB·계정·환경 파일을 공유하지 않는다.
 - API는 loopback `127.0.0.1:8181`에만 bind한다. systemd 예시는 [monp-api.service.example](../../back/deploy/monp-api.service.example)이다.
+- portfolio와 RAM을 공유하므로 MONP JVM heap은 `-Xms128m -Xmx512m`로 제한한다. 종전 `MaxRAMPercentage=70` 예시는 교체했다.
 - Caddy는 별도의 API host로 전달하도록 제안한다. [monp-api.caddy.example](../../back/deploy/monp-api.caddy.example)은 Tailscale 주소 대역만 허용하는 예시이며, `example.invalid`를 실제 API DNS 이름으로 바꾸고 소유자 장치만 허용하는 Tailscale ACL을 먼저 설정한다.
 - CORS origin 목록은 실제 웹 주소와 `capacitor://localhost`, `https://localhost` 중 사용하는 앱 origin으로 제한한다. CORS는 인증이 아니다. 현재 API에는 사용자 로그인 기능이 없으므로 공개 인터넷에서 쓰기 API에 접근할 수 있도록 설정하지 않는다.
+
+### 현재 서버에서 우선 적용할 구성
+
+Tailscale은 현재 설치되지 않았다. 먼저 승인 후 loopback 전용 MONP DB·서비스를 설치하고, Tailscale 등록·소유자 장치 ACL·HTTPS를 설정한 뒤 별도 Caddy site를 추가한다. 공유기의 80/443/2222 포워딩, portfolio의 8081 upstream, UFW 변경은 필요하지 않다. UFW 실제 rule과 외부 포트포워딩은 이번 일반 사용자 점검에서 확인하지 못했다.
+
+권장 API 주소는 `https://<MiniPC의 실제 MagicDNS FQDN>.ts.net/api`다. [monp-api.tailscale.caddy.example](../../back/deploy/monp-api.tailscale.caddy.example)은 IPv4와 IPv6 tailnet source를 허용하고 그 외에는 403을 반환한다. 대역 제한과 함께 ACL을 소유자 장치로 제한해야 한다. `.ts.net` HTTPS를 tailnet에서 활성화하고 `/etc/default/tailscaled`에 `TS_PERMIT_CERT_UID=caddy`를 설정해야 Caddy 사용자로 인증서를 얻을 수 있다. 기존 설정값은 보존하며 변경 후 tailscaled 재시작은 별도로 승인받는다. 인증서 발급 도메인은 공개 인증서 투명성 로그에 기록된다. 세부 절차는 [Tailscale Caddy 공식 문서](https://tailscale.com/docs/integrations/web-servers/caddy/caddy-certificates)와 [HTTPS 공식 문서](https://tailscale.com/docs/how-to/set-up-https-certificates)를 따른다.
+
+브라우저가 직접 사설 API에 접속하므로 웹/iPhone 장치도 tailnet에 연결되어야 한다. Vercel 사이트가 공개여도 API가 인터넷에 공개될 필요는 없다. 브라우저의 로컬 네트워크 접근 권한과 실제 HTTPS CORS는 운영 적용 후 장치에서 확인한다. 현재 HTTP E2E는 localhost 검증이다.
+
+### 승인 후 최초 로컬 설치
+
+[install-local.sh](../../back/deploy/install-local.sh)는 현재 검증된 JAR checksum, 호스트, 8181 충돌, 기존 MONP DB/user/경로를 검사하고 기존 MONP 설치가 있으면 덮어쓰기 전에 멈춘다. 실제 웹 origin이 확정되고 운영 설치를 승인받은 후 실행한다.
+
+```bash
+sudo bash back/deploy/install-local.sh https://ACTUAL-MONP-FRONTEND-HOST
+```
+
+설치 범위는 `monp` OS user/group, MariaDB `monp` DB와 `monp_app@127.0.0.1`, `/etc/monp`, `/opt/monp-api`, `/var/lib/monp-api`, `/var/backups/monp`, `monp-api.service`, `monp-backup.service/timer`, `/usr/local/sbin/backup-monp`이다. Caddy·Tailscale·DNS·공유기·방화벽을 수정하지 않는다. 무작위 DB 비밀번호는 stdin과 root 0600 env 파일로만 전달한다. Flyway가 앱 시작 때 migration을 실행하므로 app account의 DDL 권한도 전용 `monp.*` 범위에서 필요하다.
+
+최초 설치는 실패 시 전체 자동 삭제하지 않는다. health 실패 시 MONP service를 disable/stop하고 전용 파일·DB를 진단용으로 남긴다. 다른 서비스나 운영 DB를 자동으로 되돌리거나 삭제하지 않는다. 재실행 전 실패 지점을 확인해야 한다. 활성화 후 `systemctl stop monp-backup.timer monp-api.service`로 MONP만 중지할 수 있다.
 
 ## 서버 환경 변수
 
@@ -28,7 +49,7 @@ MONP_API_DOCS_ENABLED=false
 MONP_SWAGGER_UI_ENABLED=false
 ```
 
-백업 전용 DB 자격 증명은 별도 `/etc/monp/backup.cnf`에 둔다(`0600`, root 소유, `[client]` 아래 `user`, `password`, `host=127.0.0.1`, `database=monp`). 서비스 DB 계정에는 필요한 DB 범위만 권한을 준다.
+백업 DB 연결 설정은 별도 `/etc/monp/backup.cnf`에 둔다(`0600`, root 소유). 최초 설치 스크립트는 root-run backup에 MariaDB root의 로컬 Unix socket 인증을 사용한다(`user=root`, `host=localhost`, `protocol=socket`, `socket=/run/mysqld/mysqld.sock`). portfolio env를 읽거나 재사용하지 않으며 dump 대상은 `monp`만 지정한다. 별도 백업 DB account를 사용한다면 dump의 `--routines --triggers`까지 필요한 읽기 권한을 DBA가 확인한다.
 
 ## 설치 및 점검 순서
 
@@ -42,7 +63,9 @@ MONP_SWAGGER_UI_ENABLED=false
 
 ## 백업과 복구
 
-[backup-monp.sh.example](../../back/deploy/backup-monp.sh.example)을 root 소유 executable로 설치하고 systemd timer 등으로 하루 한 번 실행한다. 출력은 DB dump와 업로드 파일을 같은 시점 폴더에 보관하고 14일 뒤 정리한다. 별도 장치나 암호화된 원격 저장소에 사본을 복제해야 MiniPC 디스크 고장에도 복구할 수 있다.
+[backup-monp.sh.example](../../back/deploy/backup-monp.sh.example)을 root 소유 executable로 설치한다. [monp-backup.timer.example](../../back/deploy/monp-backup.timer.example)은 서버 로컬 시간 매일 04:15부터 최대 10분 지연 후 실행한다. 스크립트는 flock으로 중복 실행을 차단하고 **MONP API만 잠시 중지**해 SQL과 uploads의 일관성을 보장한다. 이 동안 MONP 조회·쓰기는 일시 중단된다. 덤프/압축 실패 시에도 원래 active였던 MONP는 EXIT trap에서 재시작하며 실패한 백업은 공개하지 않는다. SHA256SUMS를 생성하고 완성된 백업 폴더만 atomic rename한다. 14일을 넘긴 백업은 정리한다. 이 설정은 아직 운영에 설치되지 않았다. 별도 장치나 암호화된 원격 저장소에 사본을 복제해야 MiniPC 디스크 고장에도 복구할 수 있다.
+
+복원 전에 백업 폴더에서 `sha256sum -c SHA256SUMS`를 실행한다. 다른 배포/유지보수 작업은 백업과 겹치지 않게 계획한다. MONP 이외의 DB writer가 추가되면 이 중지 방식만으로 일관성을 보장할 수 없으므로 함께 중지해야 한다.
 
 복구 훈련은 별도의 빈 restore DB와 임시 업로드 경로에서 진행한다. SQL 복원 후 같은 시점의 `uploads.tar.gz`를 풀고, 임시 포트에서 API를 띄워 health·작품 수·이미지 조회를 확인한다. 검증된 백업의 날짜와 checksum을 기록한다. 운영 DB에 덮어쓰는 복구는 복구 대상과 백업 시점을 정하고 확인한 뒤 실행한다.
 
@@ -56,4 +79,4 @@ MONP_SWAGGER_UI_ENABLED=false
 
 ## 필요한 실제 서버 확인
 
-배포 실행 전 SSH 접속 alias/계정/포트와, Tailscale을 사용할 계정·장치 상태가 필요하다. `SERVER_INFO.md`의 이전 경로와 포트는 참고값으로만 취급한다. 이 문서와 설정 예시는 서버에 적용하지 않았다.
+현재 MiniPC에서 직접 작업하므로 MONP 배포를 위한 SSH alias는 필요하지 않다. 남은 정보는 실제 MONP frontend origin, Tailscale 계정·장치 등록·ACL·MagicDNS FQDN이다. systemd/Caddy 실적용, TLS·tailnet 허용/거부 클라이언트, 외부 노출, 운영 restart/rollback, off-host 복제는 승인 후 검증한다. 임시 DB 복원 훈련은 운영 DB 복구를 대신하지 않는다.

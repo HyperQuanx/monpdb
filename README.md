@@ -2,6 +2,8 @@
 
 여러 작품의 캐릭터·세계관·플롯·설정·아이디어·메모를 서로 연결해 관리하는 개인용 소설 설정 도구의 웹 프론트엔드입니다.
 
+다른 개발 환경에서 이어서 작업할 때는 [`ai_read/CODEX_HANDOFF.md`](ai_read/CODEX_HANDOFF.md)를 먼저 읽습니다.
+
 - 배포: <https://monpdb.vercel.app/> (Vercel)
 - 스택: React 19, Vite 8, React Router 7(data router, route lazy), TanStack Query 5, Zod 4, Tiptap 3, DOMPurify
 - 테스트: Vitest + React Testing Library, Playwright + axe-core
