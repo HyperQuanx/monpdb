@@ -60,7 +60,7 @@ const legacyCharacterRoutes = characterRegions.flatMap((region) => [
   },
 ]);
 
-export const router = createBrowserRouter([
+export const routeDefinitions = [
   {
     path: "/",
     errorElement: <ErrorPage />,
@@ -195,4 +195,6 @@ export const router = createBrowserRouter([
       ...legacyCharacterRoutes,
     ],
   },
-]);
+];
+export const createAppRouter = () => createBrowserRouter(routeDefinitions);
+export const router = import.meta.env.MODE === "test" ? createAppRouter() : undefined;

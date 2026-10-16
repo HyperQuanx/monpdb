@@ -14,6 +14,7 @@ import { createWorkBackupService } from "../backup/workBackup";
 
 export const httpClient = createApiClient();
 const encode = encodeURIComponent;
+export const resolveApiImage = (imageUrl, baseUrl = apiBaseUrl) => new URL(imageUrl.replace(/^\/api\/v1\//, ""), `${baseUrl.replace(/\/+$/, "")}/`).href;
 const collections = { character: "characters", content: "contents", idea: "ideas", memo: "memos", plot: "plotScenes", setting: "settings", world: "worlds" };
 export const createHttpRepositories = ({ api = httpClient, baseUrl = apiBaseUrl } = {}) => {
   const snapshots = new Map();
@@ -22,8 +23,8 @@ export const createHttpRepositories = ({ api = httpClient, baseUrl = apiBaseUrl 
   const path = (workId, kind, id = "") => `/works/${encode(workId)}/entries/${kind}${id ? `/${encode(id)}` : ""}`;
   const clear = (workId) => { generation += 1; if (workId) { snapshots.delete(workId); pending.delete(workId); } else { snapshots.clear(); pending.clear(); } };
   const normalizeImages = (fixture) => {
-    for (const work of fixture.works) if (work.cover?.startsWith("/api/")) work.cover = new URL(work.cover, baseUrl).href;
-    for (const character of fixture.characters) if (character.imageUrl?.startsWith("/api/")) character.imageUrl = new URL(character.imageUrl, baseUrl).href;
+    for (const work of fixture.works) if (work.cover?.startsWith("/api/")) work.cover = resolveApiImage(work.cover, baseUrl);
+    for (const character of fixture.characters) if (character.imageUrl?.startsWith("/api/")) character.imageUrl = resolveApiImage(character.imageUrl, baseUrl);
     return fixture;
   };
   const snapshot = async (workId, force = false) => {
@@ -56,7 +57,7 @@ export const createHttpRepositories = ({ api = httpClient, baseUrl = apiBaseUrl 
     async list(filters = {}) { return (await snapshot(filters.workId)).adapters[kind].list(filters); },
     async get(workId, id) {
       const result = await api.get(path(workId, kind, id));
-      if (kind === "character" && result.imageUrl?.startsWith("/api/")) result.imageUrl = new URL(result.imageUrl, baseUrl).href;
+      if (kind === "character" && result.imageUrl?.startsWith("/api/")) result.imageUrl = resolveApiImage(result.imageUrl, baseUrl);
       return result;
     },
     create: (workId, payload) => change(workId, path(workId, kind), { body: payload }),
@@ -66,7 +67,7 @@ export const createHttpRepositories = ({ api = httpClient, baseUrl = apiBaseUrl 
   }]));
   const contentCreate = entryRepositories.content.create;
   entryRepositories.content.create = (workId, menuItemId, payload = {}) => contentCreate(workId, { ...payload, menuItemId });
-  entryRepositories.character.storeImage = async (file) => { const body = new FormData(); body.set("image", file); return new URL((await api.write("/images", { body })).imageUrl, baseUrl).href; };
+  entryRepositories.character.storeImage = async (file) => { const body = new FormData(); body.set("image", file); return resolveApiImage((await api.write("/images", { body })).imageUrl, baseUrl); };
   entryRepositories.plot.move = (workId, id, payload) => change(workId, `${path(workId, "plot", id)}/position`, { method: "PUT", body: payload, matchPath: path(workId, "plot", id) });
   entryRepositories.setting.listOwners = async (workId) => (await snapshot(workId)).adapters.setting.listOwners(workId);
   entryRepositories.idea.transition = (workId, id, status) => entryRepositories.idea.update(workId, id, { status });

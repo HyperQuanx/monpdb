@@ -11,6 +11,7 @@ lerna-debug.log*
 .env.*
 !.env.example
 !.env.ios.example
+!.env.http.example
 
 node_modules
 dist
@@ -35,4 +36,7 @@ ai_read/SERVER_INFO.md
 # Generated test output
 coverage/
 playwright-report/
+.vercel/
 test-results/
+.vercel
+.env*

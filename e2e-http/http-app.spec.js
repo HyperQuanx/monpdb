@@ -1,7 +1,6 @@
-import { test, expect } from "@playwright/test";
-const API = "http://127.0.0.1:8181/api/v1";
+import { test, expect, API } from "./authTest";
 test.beforeEach(async ({ request }) => {
-  await expect.poll(async () => { try { return (await request.get("http://127.0.0.1:8181/healthz")).status(); } catch { return 0; } }, { timeout: 15_000 }).toBe(200);
+  await expect.poll(async () => { try { return (await request.get(`${API}/works`)).status(); } catch { return 0; } }, { timeout: 15_000 }).toBe(200);
 });
 test("persists a complete character journey and reads cached text offline", async ({ page, context, request }) => {
   const created = await request.post(`${API}/works`, { data: { title: "HTTP 여정", slug: `http-${Date.now()}` } });

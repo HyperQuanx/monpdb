@@ -1,6 +1,8 @@
 # MONP MiniPC 서버 준비 안내
 
-이 문서는 MONP 배포를 위한 **검토 가능한 초안**이다. 2026-10-12에 `coke-NucBox-G3`에 직접 접속해 OS·서비스·포트·Caddy 구성을 확인하고 분리 DB에서 검증했다. 실제 DB/user·systemd·Caddy 설치는 아직 하지 않았다. 상세 결과는 [MINIPC_DEPLOYMENT_REVIEW.md](MINIPC_DEPLOYMENT_REVIEW.md)를 참고한다. `SERVER_INFO.md`의 과거 값 중 Java 버전과 소스 경로는 현재와 다르다.
+> **현재 상태(2026-10-16):** 전용 DB·API·백업 timer와 공개 비밀번호 접속 운영 배포 완료. 웹 `https://monpdb.vercel.app/`, API `https://qbix-portfolio.shop/monp-api/api`. 새 브라우저에서 비밀번호 확인/작품 조회/refresh/logout·token 폐기 통과, health와 관련 서비스 정상. 기기별 Tailscale 설치는 필요 없다. [PASSWORD_PUBLIC_ACCESS.md](PASSWORD_PUBLIC_ACCESS.md)가 현재 구성의 기준이며 아래 Tailscale 준비·인증 없음 설명은 전환 전 이력이다. 별도 물리 장치·외부 회선과 운영 복구 검증은 남아 있다.
+
+2026-10-14 전용 MONP DB·API·backup timer 운영 설치와 최초 백업 검증을 완료했다. Tailscale/Caddy HTTPS 연결은 준비 중이며 [TAILSCALE_CONNECTION_GUIDE.md](TAILSCALE_CONNECTION_GUIDE.md)를 따른다. 상세 검증·설치 이력은 [MINIPC_DEPLOYMENT_REVIEW.md](MINIPC_DEPLOYMENT_REVIEW.md)를 참고한다. `SERVER_INFO.md`의 과거 값 중 Java 버전과 소스 경로는 현재와 다르다.
 
 ## 배포 구성
 
@@ -22,10 +24,16 @@ Tailscale은 현재 설치되지 않았다. 먼저 승인 후 loopback 전용 MO
 
 ### 승인 후 최초 로컬 설치
 
+**2026-10-14 완료:** 최초 설치와 finish 스크립트 실행 후 API/backup timer enabled·active, 최초 backup Result=success와 SQL/uploads checksum OK를 확인했다. MONP는 loopback 8181·health UP, portfolio 정상이다. 초기 설치·finish 명령을 다시 실행할 필요는 없다. 아래 sudo 대기/실패 설명은 진행 과정의 기록이며 다음 단계는 Tailscale/Caddy HTTPS 연결이다.
+
+2026-10-14 최초 설치는 사용자가 실행하여 DB·API 설치까지 완료됐다. 최초 backup은 Java exit 143이 failed로 표시되는 문제로 중단됐고 timer는 아직 비활성이다. `SuccessExitStatus=143` 수정과 백업 재실행은 `sudo bash back/deploy/finish-local-install.sh`로 처리한다. 이 스크립트는 기존 DB/env/release를 보존하고 systemd drop-in만 추가한다. 초기 설치 명령을 다시 실행하지 않는다. 자세한 상태는 배포 검토 결과의 최초 설치 후속 섹션을 따른다.
+
+2026-10-14 전용 DB·서비스·백업 타이머 설치는 사용자 승인을 받았다. 에이전트의 `sudo -n` 실행은 비밀번호 필요로 설치 전에 종료했다. 재승인은 필요 없으며 아래 명령을 저장소 루트의 서버 터미널에서 실행해 sudo 비밀번호를 직접 입력한다. 실행 후 health·unit·backup·timer·portfolio 유지 여부를 확인한다. 비밀번호는 채팅에 보내지 않는다.
+
 [install-local.sh](../../back/deploy/install-local.sh)는 현재 검증된 JAR checksum, 호스트, 8181 충돌, 기존 MONP DB/user/경로를 검사하고 기존 MONP 설치가 있으면 덮어쓰기 전에 멈춘다. 실제 웹 origin이 확정되고 운영 설치를 승인받은 후 실행한다.
 
 ```bash
-sudo bash back/deploy/install-local.sh https://ACTUAL-MONP-FRONTEND-HOST
+sudo bash back/deploy/install-local.sh https://monpdb.vercel.app
 ```
 
 설치 범위는 `monp` OS user/group, MariaDB `monp` DB와 `monp_app@127.0.0.1`, `/etc/monp`, `/opt/monp-api`, `/var/lib/monp-api`, `/var/backups/monp`, `monp-api.service`, `monp-backup.service/timer`, `/usr/local/sbin/backup-monp`이다. Caddy·Tailscale·DNS·공유기·방화벽을 수정하지 않는다. 무작위 DB 비밀번호는 stdin과 root 0600 env 파일로만 전달한다. Flyway가 앱 시작 때 migration을 실행하므로 app account의 DDL 권한도 전용 `monp.*` 범위에서 필요하다.
@@ -44,7 +52,7 @@ MONP_DB_URL=jdbc:mariadb://127.0.0.1:3306/monp
 MONP_DB_USERNAME=monp_app
 MONP_DB_PASSWORD=<server-only-secret>
 MONP_UPLOAD_DIRECTORY=/var/lib/monp-api/uploads
-MONP_CORS_ORIGINS=<explicit-frontend-origins>
+MONP_CORS_ORIGINS=https://monpdb.vercel.app,capacitor://localhost
 MONP_API_DOCS_ENABLED=false
 MONP_SWAGGER_UI_ENABLED=false
 ```
@@ -79,4 +87,4 @@ MONP_SWAGGER_UI_ENABLED=false
 
 ## 필요한 실제 서버 확인
 
-현재 MiniPC에서 직접 작업하므로 MONP 배포를 위한 SSH alias는 필요하지 않다. 남은 정보는 실제 MONP frontend origin, Tailscale 계정·장치 등록·ACL·MagicDNS FQDN이다. systemd/Caddy 실적용, TLS·tailnet 허용/거부 클라이언트, 외부 노출, 운영 restart/rollback, off-host 복제는 승인 후 검증한다. 임시 DB 복원 훈련은 운영 DB 복구를 대신하지 않는다.
+현재 MiniPC에서 직접 작업하므로 MONP 배포를 위한 SSH alias는 필요하지 않다. 2026-10-14 사용자가 Vercel 배포 주소 `https://monpdb.vercel.app/`를 확인했다(CORS origin은 `https://monpdb.vercel.app`). 남은 정보는 Tailscale 계정·장치 등록·ACL·MagicDNS FQDN이다. 운영 설치 승인은 아직 대기 중이며 systemd/Caddy 실적용, TLS·tailnet 허용/거부 클라이언트, 외부 노출, 운영 restart/rollback, off-host 복제는 승인 후 검증한다. 임시 DB 복원 훈련은 운영 DB 복구를 대신하지 않는다.

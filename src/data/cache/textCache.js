@@ -1,4 +1,19 @@
 import { CACHE_BUSTER, CACHE_MAX_AGE } from "../http/config";
+const memoryCaches = new Set();
+export const clearTextCaches = async () => {
+  memoryCaches.forEach((cache) => cache.clear());
+  if (!globalThis.indexedDB) return;
+  await new Promise((resolve) => {
+    const request = indexedDB.open("monp-text-cache", 1);
+    request.onupgradeneeded = () => request.result.createObjectStore("cache");
+    request.onerror = request.onblocked = () => resolve();
+    request.onsuccess = () => {
+      const db = request.result;
+      const tx = db.transaction("cache", "readwrite"); tx.objectStore("cache").clear();
+      tx.oncomplete = tx.onerror = tx.onabort = () => { db.close(); resolve(); };
+    };
+  });
+};
 
 // Persist text/metadata only. Binary images and image URLs never enter the cache.
 export const textOnly = (value) => {
@@ -9,6 +24,7 @@ export const textOnly = (value) => {
 export const createTextCache = ({ scope, now = Date.now, maxAge = CACHE_MAX_AGE, buster = CACHE_BUSTER } = {}) => {
   let opening;
   const memory = new Map();
+  memoryCaches.add(memory);
   const open = () => {
     if (!globalThis.indexedDB) return Promise.resolve(null);
     opening ??= new Promise((resolve) => {

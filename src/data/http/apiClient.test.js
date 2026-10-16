@@ -3,8 +3,23 @@ import { createApiClient } from "./apiClient";
 import { createTextCache } from "../cache/textCache";
 import { appFixture } from "../fixtures/appFixture";
 import { createHttpRepositories } from "../repositories/httpRepositories";
+import { resolveApiImage } from "../repositories/httpRepositories";
+import { getAccessToken, setPasswordSession } from "./passwordSession";
 const response = (body, status = 200, etag) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json", ...(etag ? { ETag: etag } : {}) } });
 describe("HTTP and text cache", () => {
+  it("sends authorization, clears an expired session and never falls back on 401", async () => {
+    setPasswordSession({ token: "expired-test-token", expiresAt: new Date(Date.now() + 60000).toISOString() });
+    const cache = createTextCache({ scope: "auth-test" });
+    await cache.put("/works", { data: ["cached-private-data"] });
+    const fetchImpl = vi.fn().mockResolvedValue(response({ code: "authentication_required" }, 401));
+    const client = createApiClient({ fetchImpl, cache, online: () => true });
+    await expect(client.get("/works")).rejects.toMatchObject({ status: 401 });
+    expect(fetchImpl.mock.calls[0][1].headers.Authorization).toBe("Bearer expired-test-token");
+    expect(getAccessToken()).toBe("");
+  });
+  it("keeps the public API path prefix for uploaded images", () => {
+    expect(resolveApiImage("/api/v1/images/id", "https://host.test/monp-api/api/v1")).toBe("https://host.test/monp-api/api/v1/images/id");
+  });
   it("uses the loaded ETag and surfaces a stale edit without retrying", async () => {
     const fetchImpl = vi.fn().mockResolvedValueOnce(response({ title: "old" }, 200, '"3"')).mockResolvedValueOnce(response({ code: "version_conflict", detail: "changed" }, 409));
     const client = createApiClient({ baseUrl: "https://api.test/v1", fetchImpl, online: () => true, onReachable: vi.fn() });

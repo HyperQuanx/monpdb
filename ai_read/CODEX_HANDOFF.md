@@ -1,9 +1,32 @@
 # MONP Codex 인수인계 메모
 
-> 갱신: 2026-10-12
+> 갱신: 2026-10-16
 > 목적: `front/`와 `back/`을 MiniPC로 복사한 뒤 그곳의 Codex가 작업을 이어갈 때 이 문서를 먼저 읽는다.
 
 ## 작업 위치와 운영 원칙
+
+- **최우선 현재 상태(2026-10-16): 공개 비밀번호 운영 배포·새 브라우저 검증 완료.** 사용자가 서버 deploy-password-access와 Vercel publish-password-web을 성공시켰다. 웹 `https://monpdb.vercel.app/`, API base `https://qbix-portfolio.shop/monp-api/api`. 인증 정보 없는 새 Chromium에서 로컬 네트워크 권한 부여 없이 최초 gate·login 200·versions/works 200·refresh 유지·logout 204·폐기 token 401, 페이지 오류 0 확인. 비인증 works 401, 양쪽 health 정상, API/backup timer/Caddy/portfolio-blue active. 작품/이미지 데이터 변경 없음. 운영 rollback `/var/backups/monp-password-release/20261015T055422Z`, Vercel deployment `56TYHtUN3ijkNBNMewzmmKZ6jsjj`. 별도 PC/모바일 외부 회선·저장·운영 rollback/restore·off-host 복제·Mac/iPhone 검증은 남아 있다. 계획서와 [PASSWORD_PUBLIC_ACCESS.md](PASSWORD_PUBLIC_ACCESS.md)에 저장했다. 아래 미배포/sudo/Vercel/Tailscale-only 설명은 과거 기록이다. 재설치·재로그인·Git commit/push를 실행하지 않는다.
+
+- **공개 비밀번호 방식 최종 검증 완료(2026-10-15):** backend 38, frontend 316(46 files), HTTP E2E 3/3, lint/public build, prod auth/path-alias smoke, SQL/uploads restore, Caddy draft validation 통과. 최종 JAR hash `e009c717a70c5b97cc25e76a7204963e3484c66bece5d8149f11656204001fa0`, manifest 고정. 요청 비밀번호의 private hash는 `/tmp/monp-password-access.hash`(0600)에 준비했고 plaintext는 코드/Vercel에 없다. 운영은 아직 private release다. sudo 비밀번호 및 Vercel 로그인 필요로 미반영. 사용자 터미널에서 `sudo bash back/deploy/deploy-password-access.sh --password-hash-file /tmp/monp-password-access.hash`, 이어서 sudo 없이 `bash back/deploy/publish-password-web.sh` 실행 후 실제 공개 웹과 외부 장치를 검증한다. 재승인/Google 계정 정보는 필요 없고 Git commit/push는 하지 않는다.
+
+- **2026-10-15 공개 비밀번호 방식으로 변경:** 사용자는 다른 PC/모바일에서도 Tailscale 설치 없이 접속하기를 원하며 Google 로그인 대신 첫 접속 시 비밀번호만 입력하는 방식으로 최종 결정했다. 해당 비밀번호는 소스/문서/Vercel에 기록하지 않는다. 서버 PBKDF2 hash/8h token, 전체 경로 auth filter, password gate·이미지 bearer fetch·logout/cache clear 구현. 공개 API는 `https://qbix-portfolio.shop/monp-api/api`, frontend는 기존 Vercel 유지. 배포/backup/rollback 및 Git push 없는 Vercel local-source publish script 준비. 구현 중이며 운영은 아직 기존 private 방식이다. 검증 상태와 다음 실행 순서는 [PASSWORD_PUBLIC_ACCESS.md](PASSWORD_PUBLIC_ACCESS.md)를 먼저 읽는다. 이전 Tailscale-only 요구는 이 사용자 지시로 대체됐으며 Google 계정 이메일/Client ID는 필요 없다.
+
+- **Vercel 실제 HTTP 연결 완료(2026-10-14):** 사용자가 Production env 변경/redeploy 완료. 현재 공개 bundle은 HTTP 모드·확정 API 주소를 포함하며 MiniPC Tailscale DNS enabled/일반 FQDN health UP이다. 로컬 네트워크 권한을 허용한 Chromium mobile viewport에서 공개 웹→실제 versions/works GET 200, page error 0/API failure 0, 작품 0개를 확인했다(읽기 전용). 신규 Chrome에서 권한 미허용 시 초기 요청이 local address space 접근 거부로 실패하므로 사용자가 사이트의 로컬 네트워크 접근을 허용해야 한다. 샘플은 운영 DB로 자동 옮겨지지 않는다. 다른 PC/iPhone 등록·whitelist 갱신·실접속/CRUD·외부 exposure·운영 복구 검증은 남아 있다. 아래 Vercel/DNS 대기는 과거 기록이다.
+
+- **Caddy HTTPS 완료 후속:** connect script 성공, backup `/var/backups/monp-caddy/20261014T093633Z`. 실제 TLS health UP/works 200, Vercel origin CORS 200, 다른 origin·loopback source 403, portfolio HTTPS 정상. 모든 관련 unit active. API base `https://coke-nucbox-g3.tail4c5836.ts.net/api`. MiniPC는 accept-dns=false여서 일반 이름 조회가 실패하므로 사용자 터미널에서 `sudo tailscale set --accept-dns=true` 후 health를 확인해야 한다(IP 지정 TLS 검증은 완료). Vercel 로컬 CLI/auth 연결은 없으며 Production에 VITE_DATA_MODE=http와 해당 API base를 설정하고 redeploy가 필요하다. 현재 production fixture는 미변경, 실제 HTTPS 주소의 local HTTP build 완료. owner 기기는 MiniPC 한 대로 PC/iPhone 등록과 whitelist 갱신·실기기 검증은 남아 있다. 이전 Caddy/login 대기는 과거 기록이다.
+
+- **HTTPS 활성화 후속:** CertDomains에 실제 MONP FQDN이 확인됐고 node Running/Online, health 문제 없다. connect script 최초 실행은 tailscaled 재시작 직후 cert 요청의 `no netmap available`로 Caddy 적용 전에 멈췄다. `TS_PERMIT_CERT_UID=caddy`는 적용됐다. script에 `tailscale wait --timeout=60s`와 해당 일시 오류만 최대 5번 재시도하는 처리를 추가했으며 일시 오류·권한 오류·재시도 한도 tests 통과. 사용자가 `sudo bash back/deploy/connect-tailscale-caddy.sh`를 재실행해 Caddy 적용·HTTPS 검증을 마쳐야 한다. MONP/portfolio는 정상이다.
+
+- **Tailscale 등록 완료 후속:** Tailscale 1.104.1 설치와 사용자 로그인이 완료됐다. 실제 node는 `coke-nucbox-g3.tail4c5836.ts.net` / `100.66.211.102`, Running 상태이며 MONP/portfolio 정상이다. HTTPS CertDomains 미설정, 다른 owner 기기 0대다. `Peer=null`/`CertDomains=null` 응답 처리와 회귀 검증을 추가했다. 프론트 env 예시는 실제 `https://coke-nucbox-g3.tail4c5836.ts.net/api`로 확정했다. 다음은 사용자 DNS admin HTTPS 활성화·PC/iPhone 연결 후 `sudo bash back/deploy/connect-tailscale-caddy.sh`, HTTPS 접근 검증과 Vercel HTTP env/redeploy다. Caddy/Vercel은 아직 미변경이다. 아래 미설치/login 대기는 과거 기록이다.
+
+- **2026-10-14 네트워크 연결 후속:** 사용자가 다음 단계 진행을 요청했다. Tailscale 미설치/sudo 인증 필요로 `install-tailscale.sh`의 관리자 실행은 시작 전에 종료했다. 공식 stable 1.104.1 설치·사용자 브라우저 로그인 script, 실제 owner 장치 whitelist와 rollback을 포함하는 Caddy 연결 script를 준비했다. 현재 Vercel bundle은 fixture 모드 확인, `.env.http.example` 추가 및 portfolio 주소를 MONP API 기본 예시에서 제거했다. 실제 등록/HTTPS/Caddy/Vercel 변경은 아직 없으며 [TAILSCALE_CONNECTION_GUIDE.md](TAILSCALE_CONNECTION_GUIDE.md)를 따른다. 먼저 사용자가 서버 터미널에서 설치/login하고 실제 FQDN을 확정해야 한다. 해당 다음 단계 요청을 다시 승인받지 않는다.
+
+- **2026-10-14 로컬 설치 완료:** 사용자가 finish 스크립트를 실행했고 직접 상태 확인도 완료했다. MONP API와 backup timer enabled/active, backup Result=success/exit 0, `/var/backups/monp/20261014T083005Z` SQL/uploads checksum OK, MONP health UP·portfolio ok. 최초 timer 예정 2026-10-15 04:17:28 KST. 아래 sudo 대기/backup 실패는 과거 기록이며 재설치하지 않는다. 다음은 Tailscale/Caddy HTTPS 접근 구성과 Vercel HTTP API 연결이다. 해당 운영 변경 승인은 아직 받지 않았다.
+
+- **2026-10-14 최초 설치 후속:** 사용자가 설치 명령을 실행해 전용 DB/migrations와 MONP API unit은 설치되어 enabled/active, health UP이다. 최초 backup은 Java 종료 코드 143이 systemd에서 failed로 판정되어 dump 전에 중단됐다. API는 trap으로 재시작됐고 portfolio 정상, timer는 disabled다. 예시에 `SuccessExitStatus=143`을 추가했고 실제 임시 user unit으로 failed→inactive 개선을 검증했다. `sudo bash back/deploy/finish-local-install.sh`로 기존 설치를 보존하며 drop-in 적용·backup/checksum·timer 활성화를 마무리한다. 초기 설치 스크립트를 다시 실행하지 않는다. 에이전트 sudo는 비밀번호 필요로 미실행이므로 서버 터미널에서 인증해야 한다. 이 후속 상태가 아래 설치 전 기록보다 우선한다.
+
+- **2026-10-14 사용자 확인:** MONP frontend는 `https://monpdb.vercel.app/`에 Vercel 배포되어 있으며 CORS origin은 `https://monpdb.vercel.app`이다. frontend 주소 확인은 완료했고 운영 설치 승인은 아직 대기 중이다.
+- **2026-10-14 설치 승인 완료:** 사용자가 전용 DB·서비스·백업 타이머 설치를 명시적으로 승인했다. `sudo -n`으로 설치를 시도했지만 비밀번호가 필요해 설치 전에 종료했다. 해당 설치에 재승인을 요청하지 않는다. 사용자 서버 터미널에서 `sudo bash back/deploy/install-local.sh https://monpdb.vercel.app`를 실행한 뒤 결과를 검증한다. Tailscale/Caddy/Vercel 변경은 아직 별도 승인 범위다.
 
 - **2026-10-12 갱신:** 현재 작업 위치는 MiniPC `coke-NucBox-G3`의 `/home/coke/Desktop/code/monp_db_re`다. 직접 서버 점검과 분리 DB/HTTP/백업 복구 검증을 마쳤다. [MINIPC_DEPLOYMENT_REVIEW.md](MINIPC_DEPLOYMENT_REVIEW.md)와 서버 가이드가 현재 Task 20 진행 상태의 기준이다. 아래 노트북/미접속 설명은 이전 인수인계 기록이다. 운영 DB·unit·Caddy·방화벽은 아직 변경하지 않았으며 실제 frontend origin과 운영 적용 승인이 필요하다.
 

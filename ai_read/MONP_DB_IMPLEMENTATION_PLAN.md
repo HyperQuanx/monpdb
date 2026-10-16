@@ -14,10 +14,30 @@
 
 ## 구현 진행 현황
 
-> 마지막 갱신: 2026-10-12
+> 마지막 갱신: 2026-10-16
+
+> **현재 운영 상태:** 공개 HTTPS + 최초 비밀번호 접속 **배포 완료**. 사용자가 2026-10-15 서버 배포와 Vercel local-source production 배포를 모두 완료했다. 웹은 `https://monpdb.vercel.app/`, API base는 `https://qbix-portfolio.shop/monp-api/api`다. Google 로그인·기기별 Tailscale 설치는 필요 없다. 비밀번호 자체는 문서/소스/Vercel에 저장하지 않는다. [PASSWORD_PUBLIC_ACCESS.md](PASSWORD_PUBLIC_ACCESS.md)가 현재 접속 방식의 기준이다.
+
+> **2026-10-16 중단 지점부터 운영 검증 완료:** 인증 정보가 없는 새 Chromium context(390×844, 로컬 네트워크 접근 권한 부여 없음)에서 공개 웹 200·최초 비밀번호 화면 → 비밀번호 확인 200 → versions/works 조회 200 → 새로고침 후 접속 유지 → 접속 종료 204 → 폐기한 token으로 works 요청 401을 확인했다. 페이지 JavaScript 오류 0, 브라우저 API 오류 응답 0. 비인증 works는 401이며 MONP health UP·portfolio health ok, monp-api/monp-backup.timer/Caddy/portfolio-blue 모두 active다. 운영 작품/이미지 생성·수정은 하지 않았다. CLI의 Deployment Protection 안내와 별개로 canonical production 주소는 인증 없는 새 브라우저에서 Vercel 로그인 없이 열렸다.
+
+> **검증된 구현과 배포 이력:** backend 38 tests, frontend 46 files/316 tests, 공개 prefix HTTP E2E 3/3, lint/build, 최종 prod auth smoke, 분리 DB/uploads backup restore와 Caddy validation 통과. 운영 rollback 파일은 `/var/backups/monp-password-release/20261015T055422Z`. Vercel deployment ID `56TYHtUN3ijkNBNMewzmmKZ6jsjj`, Production env는 HTTP 모드와 위 공개 API base다. Git commit/push는 하지 않았다.
+
+> **남은 범위:** 별도 PC·모바일의 실제 외부 회선에서 조회/저장, 운영 rollback·복구 훈련, off-host 백업 복제와 Task 21 Mac/Xcode/iPhone 실기기 검증은 미완료다. MiniPC의 새 브라우저 검증을 다른 물리 장치의 검증으로 간주하지 않는다. Task 20~22 전체는 아직 완료 처리하지 않는다. 아래 Tailscale-only 구성·설치 승인/sudo/Vercel 대기는 과거 진행 이력이며 현재 운영 상태보다 우선하지 않는다.
+
+> Caddy HTTPS 후속: 운영 MONP site validation/reload·TLS health/works·Vercel origin CORS 허용·다른 origin/source 차단 검증 완료, portfolio 정상. MiniPC DNS 사용 활성화가 필요하며 현재 미실행이다. Vercel Production HTTP env/redeploy·다른 PC/iPhone 등록과 조회/저장·공개 인터넷 exposure/복구 검증은 아직 남아 있다. API base는 `https://coke-nucbox-g3.tail4c5836.ts.net/api`.
+
+> Tailscale 후속: 1.104.1 설치·사용자 로그인 완료, Running. node `coke-nucbox-g3.tail4c5836.ts.net`로 확정했으며 frontend env 예시 반영 완료. HTTPS CertDomains는 비어 있고 PC/iPhone 추가 등록 전이므로 DNS admin HTTPS 활성화와 Caddy 적용·실접속 검증·Vercel HTTP env/redeploy가 남아 있다. 로컬 MONP/backup/portfolio 정상 상태를 유지한다.
+
+> 네트워크 연결 준비: 다음 단계 진행 요청에 따라 Tailscale 1.104.1 signed apt 설치/login 및 owner-device whitelist Caddy script를 준비했다. sudo·사용자 로그인 대기로 실적용 전이다. 공개 Vercel bundle은 fixture 모드 확인, 실제 FQDN이 확정되고 HTTPS 접근이 검증된 뒤 Vercel HTTP env/redeploy를 진행한다. 자세한 순서는 `TAILSCALE_CONNECTION_GUIDE.md`를 따른다.
+
+> 2026-10-14 최신 상태: 전용 MONP DB·API service·backup timer **로컬 운영 설치 완료**. API/timer enabled·active, 최초 backup 성공 및 SQL/uploads checksum OK, MONP health UP·portfolio 정상. Task 20의 Tailscale/Caddy HTTPS·장치 접근 제어·외부 노출·운영 복구 검증과 이후 Vercel HTTP 연결은 남아 있다. 아래 승인/sudo/backup 실패 대기 설명은 설치 과정 기록이다.
 >
 > 현재 상태: **Phase A(Task 1~15) 완료. Task 16~19 구현·검증 완료. Task 20 MiniPC 직접 점검·분리 DB build/HTTP/backup restore 검증 완료, 전용 DB·systemd·Tailscale·Caddy 운영 적용 승인 대기. Task 21 Capacitor iOS scaffold·앱 자산 준비 중(Xcode/실기기 검증은 Mac 필요). 다음 환경으로 작업을 옮길 때 `CODEX_HANDOFF.md`를 먼저 읽는다.**
 > 이 섹션이 현재 구현 상태의 기준이며, 아래 `3. 현재 코드 분석 요약`은 Task 1 시작 전 초기 분석 기록이다.
+
+> 2026-10-14 후속: 전용 MONP DB·서비스·백업 타이머 **설치 승인 완료**. 설치 실행은 sudo 비밀번호가 없어 시작 전에 종료됐으며 서버 터미널의 관리자 인증이 필요하다. 해당 설치 승인은 유지한다. Tailscale/Caddy 운영 적용은 아직 미승인·미실행이다.
+
+> 2026-10-14 설치 실행 후: 사용자가 터미널에서 설치하여 전용 DB/Flyway V1~V4·API unit 설치 완료, MONP health UP·portfolio 정상. 최초 backup은 Java exit 143을 failed로 판정해 중단되었고 timer는 미활성이다. `SuccessExitStatus=143` 수정은 임시 user systemd unit에서 검증했다. `finish-local-install.sh`의 sudo 실행으로 backup 재검증·timer 활성화가 필요하며 에이전트에는 sudo 인증이 없다. Task 20은 아직 미완료다.
 
 ### 완료된 Task
 
@@ -45,14 +65,16 @@
 - Capacitor Network plugin 상태를 web online/offline 이벤트와 연결했다. API fallback은 네트워크 오류·일부 5xx만 허용한다.
 - 검증: front **45 files/313 tests**, lint, fixture/HTTP build, 기존 Playwright **77/77**, HTTP browser **2/2** 통과. npm audit **0 vulnerabilities**(Capacitor CLI 취약 patch와 아이콘 tool 제거 후).
 
-#### [ ] Task 20: MiniPC deployment와 server guide (2026-10-12 MiniPC 검증 완료, 운영 적용 승인 대기)
+#### [ ] Task 20: MiniPC deployment와 server guide (2026-10-16 공개 비밀번호 운영 배포·브라우저 검증 완료, 외부 실기기/운영 복구 검증 남음)
+
+- **최신 상태:** 전용 DB·API·일일 백업 timer와 공개 Caddy prefix, Vercel 비밀번호 화면까지 운영 배포 완료. 공개 새 브라우저에서 인증/조회/refresh/logout·token 폐기 검증 통과. 별도 장치·외부 회선, 운영 rollback/복구와 off-host 복제가 남아 있다. 아래 환경/승인 대기 항목은 2026-10-12~14 점검 당시 이력이다.
 
 - `front/ai_read/MINIPC_MONP_SERVER_GUIDE.md`에 전용 systemd service, Tailscale에서만 허용하는 Caddy host 예시, prod env, setup/rollback/backup/restore/runbook을 작성했다.
 - `coke-NucBox-G3`에서 직접 확인: Ubuntu 24.04.2, Java 17.0.18, Node 22.22.1, MariaDB 10.11.14, Caddy 2.6.2. portfolio Blue 8081 active, MONP 8181 미사용, DB loopback. Tailscale/Docker 미설치이며 `sudo`는 비밀번호가 필요하다.
 - 분리 MariaDB 13316/13317에서 backend **33 tests**, frontend **313 tests**(`--maxWorkers=1`), lint, fixture/HTTP build, HTTP Playwright **2/2**, prod health/docs/CORS/restart, dump·uploads checksum·별도 DB/경로 복원 및 이미지 조회 통과.
 - 백업 중 MONP만 잠시 중지해 SQL/upload 일관성을 확보하고 실패 시 재시작하는 trap, flock, SHA256SUMS, daily timer를 추가했다. lifecycle은 mock systemctl로 검증했고 실제 운영 unit은 미설치다. shared MiniPC JVM heap을 512MiB로 제한했다.
 - `back/deploy/`에 검증 재현 스크립트, checksum 고정 최초 로컬 설치 스크립트, env와 tailnet IPv4/IPv6 Caddy 초안을 준비했다. 기존 Caddy+초안 및 staged systemd validation 통과. 운영 Caddy·DB·service·firewall·router는 변경하지 않았다.
-- 실제 frontend origin, Tailscale owner enrollment/ACL/MagicDNS FQDN과 운영 설치 승인이 필요하다. TLS·외부 노출·운영 restart/rollback·off-host 복제 검증 후 Task 20을 완료한다. [MINIPC_DEPLOYMENT_REVIEW.md](MINIPC_DEPLOYMENT_REVIEW.md)에 결과·JAR hash·적용 범위를 기록했다.
+- 2026-10-14 사용자가 frontend Vercel 주소를 확인했다: CORS origin `https://monpdb.vercel.app`. Tailscale owner enrollment/ACL/MagicDNS FQDN과 운영 설치 승인은 아직 필요하다. TLS·외부 노출·운영 restart/rollback·off-host 복제 검증 후 Task 20을 완료한다. [MINIPC_DEPLOYMENT_REVIEW.md](MINIPC_DEPLOYMENT_REVIEW.md)에 결과·JAR hash·적용 범위를 기록했다.
 
 #### [ ] Task 21: Capacitor iOS project와 iPhone UX (scaffold 완료, Mac 검증 필요)
 

@@ -1,6 +1,7 @@
 import { createTextCache } from "../cache/textCache";
 import { apiBaseUrl } from "./config";
 import { isOnline, markServerReachable } from "./connectivity";
+import { accessHeaders, getAccessToken, setPasswordSession } from "./passwordSession";
 export class ApiError extends Error {
   constructor(message, { status = 0, code = "network_error" } = {}) { super(message); this.name = "ApiError"; this.status = status; this.code = code; }
 }
@@ -8,6 +9,7 @@ export const createApiClient = ({ baseUrl = apiBaseUrl, fetchImpl = globalThis.f
   const tags = new Map();
   const request = async (path, { method = "GET", body, tagPath, tag, signal } = {}) => {
     const reading = method === "GET";
+    const accessAtStart = getAccessToken();
     if (!reading && !online()) throw new ApiError("오프라인에서는 수정할 수 없습니다.", { code: "offline_mutation" });
     const fromCache = async () => {
       const saved = await cache.get(path);
@@ -25,10 +27,11 @@ export const createApiClient = ({ baseUrl = apiBaseUrl, fetchImpl = globalThis.f
       const multipart = typeof FormData !== "undefined" && body instanceof FormData;
       const response = await fetchImpl(`${baseUrl}${path}`, {
         method, signal: controller.signal,
-        headers: { ...(!multipart && body !== undefined ? { "Content-Type": "application/json" } : {}), ...(tag ? { "If-Match": tag } : {}) },
+        headers: { ...accessHeaders(), ...(!multipart && body !== undefined ? { "Content-Type": "application/json" } : {}), ...(tag ? { "If-Match": tag } : {}) },
         ...(body === undefined ? {} : { body: multipart ? body : JSON.stringify(body) }),
       });
       if (!response.ok) {
+        if (response.status === 401) setPasswordSession(null);
         const problem = await response.json().catch(() => ({}));
         if (reading && [502, 503, 504].includes(response.status)) { onReachable(false); return fromCache(); }
         throw new ApiError(problem.detail ?? `요청에 실패했습니다 (${response.status}).`, { status: response.status, code: problem.code });
@@ -37,7 +40,7 @@ export const createApiClient = ({ baseUrl = apiBaseUrl, fetchImpl = globalThis.f
       const data = await response.json();
       const etag = response.headers.get("ETag");
       if (etag) tags.set(tagPath ?? path, etag);
-      if (reading) await cache.put(path, { data, etag });
+      if (reading && accessAtStart === getAccessToken()) await cache.put(path, { data, etag });
       return data;
     } catch (error) {
       if (error instanceof ApiError) throw error;
@@ -60,7 +63,8 @@ export const createApiClient = ({ baseUrl = apiBaseUrl, fetchImpl = globalThis.f
     async probe() {
       if (globalThis.navigator?.onLine === false) return false;
       try {
-        const response = await fetchImpl(`${baseUrl}/works`, { signal: AbortSignal.timeout(timeout) });
+        const response = await fetchImpl(`${baseUrl}/works`, { headers: accessHeaders(), signal: AbortSignal.timeout(timeout) });
+        if (response.status === 401) setPasswordSession(null);
         onReachable(response.ok); return response.ok;
       } catch { onReachable(false); return false; }
     },

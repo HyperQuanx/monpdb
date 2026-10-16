@@ -10,6 +10,7 @@ import { Button, Card, EmptyState, Skeleton } from "../../../shared/ui";
 import styles from "./WorkSelectionPage.module.css";
 import { isHttpMode } from "../../../data/http/config";
 import { useOnline } from "../../../data/http/connectivity";
+import AuthenticatedImage from "../../../components/AuthenticatedImage";
 
 const statusLabels = {
   planning: "기획 중",
@@ -95,7 +96,7 @@ function WorkSelectionPage({ repository = workRepository }) {
             >
               <div className={styles.cover}>
                 {work.cover && (!isHttpMode || online) ? (
-                  <img alt={`${work.title} 표지`} src={work.cover} />
+                  <AuthenticatedImage alt={`${work.title} 표지`} src={work.cover} />
                 ) : (
                   <div aria-hidden="true" className={styles.coverFallback}>
                     {work.title.slice(0, 1)}

@@ -3,6 +3,7 @@ import { getCharacterCoverImage } from "../characters";
 import styles from "./CharacterPortrait.module.css";
 import { isHttpMode } from "../../../data/http/config";
 import { useOnline } from "../../../data/http/connectivity";
+import AuthenticatedImage from "../../../components/AuthenticatedImage";
 
 function CharacterPortrait({
   alt,
@@ -22,7 +23,7 @@ function CharacterPortrait({
 
   return (
     <>
-      <img
+      <AuthenticatedImage
         alt={alt ?? `${character?.name || "캐릭터"} 초상`}
         className={className}
         src={usesFallback ? fallbackUrl : preferredUrl}

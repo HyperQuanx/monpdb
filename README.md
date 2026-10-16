@@ -1,5 +1,7 @@
 # MONP Storage (front)
 
+2026-10-16 공개 비밀번호 접속 운영 배포와 새 브라우저 검증을 완료했습니다. `https://monpdb.vercel.app/`에서 비밀번호 확인 후 사용하며 API는 `https://qbix-portfolio.shop/monp-api/api`입니다. 사용하는 기기에 Tailscale 설치나 Google 로그인이 필요하지 않습니다. 배포 이력과 검증 범위는 [`ai_read/PASSWORD_PUBLIC_ACCESS.md`](ai_read/PASSWORD_PUBLIC_ACCESS.md)를 확인하세요.
+
 여러 작품의 캐릭터·세계관·플롯·설정·아이디어·메모를 서로 연결해 관리하는 개인용 소설 설정 도구의 웹 프론트엔드입니다.
 
 다른 개발 환경에서 이어서 작업할 때는 [`ai_read/CODEX_HANDOFF.md`](ai_read/CODEX_HANDOFF.md)를 먼저 읽습니다.
@@ -32,6 +34,7 @@ E2E 결과 HTML 보고서는 자동으로 열리지 않습니다. `npx playwrigh
 - fixture 모드 변경 사항은 브라우저 탭(SPA 세션) 동안만 유지되고, 새로고침하면 샘플 데이터로 돌아갑니다.
 - 작업을 보존하려면 **백업**(`/works/:workId/backup`)에서 JSON으로 내보내고, 다시 가져옵니다.
 - HTTP 모드는 `VITE_DATA_MODE=http`과 `VITE_API_BASE_URL`을 설정합니다. API는 loopback 8181에서 개발하고, 운영 API 주소는 HTTPS와 사설 네트워크 접근 제어를 사용합니다.
+- 2026-10-14 Vercel Production은 HTTP 모드로 연결했습니다. API base는 `https://coke-nucbox-g3.tail4c5836.ts.net/api`입니다. 사용 장치의 Tailscale 연결과 브라우저 로컬 네트워크 접근 허용이 필요하며, 현재 Caddy whitelist는 MiniPC만 포함합니다. 추가 기기 등록과 연결 순서는 `ai_read/TAILSCALE_CONNECTION_GUIDE.md`를 참고하세요. 운영 DB에 샘플 작품은 자동 생성하지 않습니다.
 
 ## 환경 변수
 
