@@ -38,12 +38,13 @@
   flex: 0 0 auto;
   border-radius: 9px;
   object-fit: cover;
+  filter: grayscale(1);
   box-shadow: 0 1px 3px rgb(0 0 0 / 18%);
 }
 
 .brandText {
   overflow: hidden;
-  color: var(--work-accent, var(--color-accent));
+  color: var(--color-text-primary);
   font-size: 0.9375rem;
   font-weight: 780;
   letter-spacing: -0.04em;

@@ -65,7 +65,7 @@
 
 .menuLink:hover,
 .activeLink {
-  color: var(--work-accent, var(--color-accent));
+  color: var(--color-text-primary);
   background: var(--color-accent-soft);
 }
 
@@ -137,7 +137,7 @@
 }
 
 .bottomNavigation .activeLink {
-  color: var(--work-accent, var(--color-accent));
+  color: var(--color-text-primary);
   background: transparent;
 }
 

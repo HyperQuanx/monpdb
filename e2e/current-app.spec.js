@@ -123,7 +123,7 @@ test("manages works separately and reflects them in selection", async ({ page })
 
   await expect(page).toHaveURL(/\/works\/manage$/);
   await page.getByLabel("작품명").fill("새 작품");
-  await page.getByLabel("슬러그").fill("new-story");
+  await expect(page.getByLabel("슬러그", { exact: true })).toHaveCount(0);
   await page.getByLabel("장르").fill("판타지");
   await page.getByRole("button", { name: "작품 추가" }).click();
   await expect(

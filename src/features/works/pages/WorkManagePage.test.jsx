@@ -36,9 +36,10 @@ describe("WorkManagePage", () => {
     ).toBeVisible();
 
     await user.type(screen.getByLabelText("작품명"), "새 작품");
-    await user.type(screen.getByLabelText("슬러그"), "new-story");
+    expect(screen.queryByLabelText("슬러그")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "작품 추가" }));
     expect(await screen.findByText("새 작품")).toBeVisible();
+    expect((await repository.list()).find((work) => work.title === "새 작품").slug).toMatch(/^work-[a-f0-9-]+$/);
 
     await user.click(screen.getByRole("button", { name: "MONP 수정" }));
     const titleInput = screen.getByLabelText("작품명");
@@ -46,6 +47,7 @@ describe("WorkManagePage", () => {
     await user.type(titleInput, "MONP 개정판");
     await user.click(screen.getByRole("button", { name: "변경 저장" }));
     expect(await screen.findByText("MONP 개정판")).toBeVisible();
+    expect((await repository.list()).find((work) => work.title === "MONP 개정판").slug).toBe(appFixture.works.find((work) => work.title === "MONP").slug);
 
     await user.click(
       screen.getByRole("button", { name: "MONP 개정판 보관" }),

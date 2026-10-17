@@ -8,11 +8,9 @@
   overflow: hidden;
   border-radius: clamp(22px, 4vw, 34px);
   padding: clamp(28px, 7vw, 72px);
-  color: #ffffff;
-  background:
-    linear-gradient(135deg, rgb(0 0 0 / 14%), rgb(0 0 0 / 44%)),
-    var(--home-accent);
-  box-shadow: var(--shadow-card-hover);
+  color: var(--color-text-primary);
+  background: var(--color-fill-tertiary);
+  border: 1px solid var(--color-border-subtle);
 }
 
 .eyebrow {
@@ -26,15 +24,16 @@
 .hero h2 {
   max-width: 760px;
   font-size: clamp(2.25rem, 8vw, 5rem);
-  font-weight: 760;
+  font-weight: 650;
   letter-spacing: -0.065em;
-  line-height: 0.98;
+  line-height: 1.15;
+  word-break: keep-all;
 }
 
 .subtitle {
   margin-top: var(--space-3);
   font-size: clamp(1rem, 3vw, 1.35rem);
-  opacity: 0.86;
+  color: var(--color-text-secondary);
 }
 
 .summary {
@@ -42,6 +41,7 @@
   margin-top: var(--space-6);
   font-size: clamp(1rem, 2.5vw, 1.125rem);
   line-height: 1.7;
+  color: var(--color-text-secondary);
 }
 
 .meta {
@@ -52,10 +52,10 @@
 }
 
 .meta span {
-  border: 1px solid rgb(255 255 255 / 42%);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-pill);
   padding: 6px 12px;
-  background: rgb(255 255 255 / 12%);
+  background: var(--color-surface);
   font-size: 0.8125rem;
   font-weight: 650;
   backdrop-filter: blur(10px);

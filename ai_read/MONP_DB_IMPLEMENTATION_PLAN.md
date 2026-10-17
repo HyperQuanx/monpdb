@@ -14,7 +14,15 @@
 
 ## 구현 진행 현황
 
-> 마지막 갱신: 2026-10-16
+> 마지막 갱신: 2026-10-18
+
+> **2026-10-18 Task 20 후속 준비·분리 검증:** 공개 웹 200/무인증 API 401/CORS 허용 200·거부 403, 서비스 4개 active/백업 success, DB·API loopback 확인. 분리 DB runtime 훈련 재실행으로 재시작 저장 유지·백업 checksum·dump 실패 후 재시작·SQL/uploads 복원·이미지 조회 통과. 운영 백업 파일은 root 권한으로 아직 미열람이며 운영 rollback/restore 미실행. 읽기 전용 복구 사전 점검 및 기본 계획 모드 SSH 복제 도구와 손상/실패/기존 사본 보존 검증을 추가했다. [TASK20_OPERATIONS_CHECKLIST.md](TASK20_OPERATIONS_CHECKLIST.md)의 실제 외부 기기 절차·복구 대상/백업 시점 확인·외부 저장 대상 확정 후 이어간다. 원격 복제 미구성, Task 20~22 미완료 유지. 기존 미커밋 변경 보존, commit/push 없음.
+
+> **새 채팅 인수인계 저장(2026-10-17):** [CODEX_HANDOFF.md](CODEX_HANDOFF.md) 상단에 현재 MiniPC 작업공간·공개 비밀번호 운영 구성·최신 디자인 배포 ID·미커밋 수정·검증 범위·Task 20~22 미완료 항목·재배포 방법을 정리했다. 새 창에서는 이 최신 요약을 먼저 읽으며 아래 과거 설치/승인 대기 기록을 현재 상태로 해석하지 않는다. 이번 요청 작업과 배포/검증은 종료됐다.
+
+> **2026-10-17 모던 디자인 전환:** 사용자 요청으로 공통 청록색 테마를 흰색·차콜·회색으로 교체했다. 로그인은 wordmark/큰 문구/접속 폼의 데스크톱 2열·모바일 1열로 재구성하고, 버튼·카드·헤더·사이드바·하단 탐색·작품 홈의 색상/그림자/여백/타이포그래피를 정리했다. 사용자 작품의 표지·저장된 강조색 데이터는 유지하며 신규 작품 기본 강조색은 회색이다. 키보드 focus는 파란색으로 명확하게 표시한다. 기존 로그인/작품 선택/관리 단위 테스트 5개, 주요 화면 모바일·데스크톱 WCAG 및 작품 관리 브라우저 테스트 11개, lint/build 통과. 로그인·선택·홈은 1440/390/320px에서 가로 넘침 0, 로그인 WCAG 검사 통과. 캡처를 직접 확인했다. **Vercel production `4v6E2Dm9bSUXRufzy2yQZMn19LBT` 배포 완료**. 공개 주소의 새 브라우저에서 웹 200·새 로그인 문구·차콜 버튼 실제 색상 `rgb(32, 33, 36)`·390px overflow 0·페이지 오류 0을 확인했다. 서버/DB 변경과 Git commit/push는 없다.
+
+> **2026-10-16 작품 입력 간소화:** 작품 추가/수정 화면의 슬러그 입력란을 제거했다. 신규 작품의 내부 slug는 UUID로 자동 생성하고 기존 작품 수정 시 기존 slug를 보존한다. 기존 작품 관리 단위 테스트와 모바일 크기 Chromium 추가/보관/복구 여정 각 1개, lint/build 통과. Vercel production 재배포 `EX4k7LfmSijGTUumAKGAbbJBddrE` 완료 후 실제 공개 작품 관리 bundle의 입력란 제거·자동 생성 포함을 확인했다. 운영 DB/API 변경과 Git commit/push는 없다.
 
 > **현재 운영 상태:** 공개 HTTPS + 최초 비밀번호 접속 **배포 완료**. 사용자가 2026-10-15 서버 배포와 Vercel local-source production 배포를 모두 완료했다. 웹은 `https://monpdb.vercel.app/`, API base는 `https://qbix-portfolio.shop/monp-api/api`다. Google 로그인·기기별 Tailscale 설치는 필요 없다. 비밀번호 자체는 문서/소스/Vercel에 저장하지 않는다. [PASSWORD_PUBLIC_ACCESS.md](PASSWORD_PUBLIC_ACCESS.md)가 현재 접속 방식의 기준이다.
 

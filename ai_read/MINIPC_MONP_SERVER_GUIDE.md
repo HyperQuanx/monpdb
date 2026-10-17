@@ -1,5 +1,7 @@
 # MONP MiniPC 서버 준비 안내
 
+> **2026-10-18 후속:** 공개 웹/API·CORS·서비스/백업 상태와 loopback 바인딩 정상. 분리 DB의 재시작·SQL/uploads 복구 훈련 재실행 통과. 실제 외부 기기 검증, 운영 백업 사본 점검/rollback·복원, 외부 복제 대상 확정은 [TASK20_OPERATIONS_CHECKLIST.md](TASK20_OPERATIONS_CHECKLIST.md)를 따른다. 읽기 전용 `check-recovery-readiness.sh` 및 기본 계획 모드 `replicate-monp.sh`를 준비했으며 실제 운영 복원/원격 복제는 실행하지 않았다.
+
 > **현재 상태(2026-10-16):** 전용 DB·API·백업 timer와 공개 비밀번호 접속 운영 배포 완료. 웹 `https://monpdb.vercel.app/`, API `https://qbix-portfolio.shop/monp-api/api`. 새 브라우저에서 비밀번호 확인/작품 조회/refresh/logout·token 폐기 통과, health와 관련 서비스 정상. 기기별 Tailscale 설치는 필요 없다. [PASSWORD_PUBLIC_ACCESS.md](PASSWORD_PUBLIC_ACCESS.md)가 현재 구성의 기준이며 아래 Tailscale 준비·인증 없음 설명은 전환 전 이력이다. 별도 물리 장치·외부 회선과 운영 복구 검증은 남아 있다.
 
 2026-10-14 전용 MONP DB·API·backup timer 운영 설치와 최초 백업 검증을 완료했다. Tailscale/Caddy HTTPS 연결은 준비 중이며 [TAILSCALE_CONNECTION_GUIDE.md](TAILSCALE_CONNECTION_GUIDE.md)를 따른다. 상세 검증·설치 이력은 [MINIPC_DEPLOYMENT_REVIEW.md](MINIPC_DEPLOYMENT_REVIEW.md)를 참고한다. `SERVER_INFO.md`의 과거 값 중 Java 버전과 소스 경로는 현재와 다르다.

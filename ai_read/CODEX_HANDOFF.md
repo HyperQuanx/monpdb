@@ -1,9 +1,71 @@
 # MONP Codex 인수인계 메모
 
-> 갱신: 2026-10-16
-> 목적: `front/`와 `back/`을 MiniPC로 복사한 뒤 그곳의 Codex가 작업을 이어갈 때 이 문서를 먼저 읽는다.
+> 갱신: 2026-10-18
+> 목적: 같은 MiniPC의 새 채팅/새 Codex 창에서 기존 작업을 이어간다. 아래 최신 인수인계를 먼저 읽고, 과거 이력의 설치·승인 대기를 현재 상태로 해석하지 않는다.
+
+## 새 채팅 시작 시 먼저 읽을 최신 인수인계
+
+**사용자 외부 기기 테스트 진행 중(2026-10-18):** 접속은 문제없이 성공했다고 보고했다. 장치/회선 상세·조회/생성/수정/저장 유지 결과는 아직 미수신이며 접속 성공만 확인된 상태다.
+
+**2026-10-18 Task 20 후속:** [TASK20_OPERATIONS_CHECKLIST.md](TASK20_OPERATIONS_CHECKLIST.md)에 실제 외부 PC/모바일 조회·생성·수정·독립 장치 저장 유지, 운영 rollback/복구의 대상·시점 확인, off-host 복제 절차를 추가했다. 공개 웹/API/CORS·서비스/backup timer 정상, 3306/8181 loopback 확인. `bash back/deploy/verify-runtime.sh` 재실행으로 **분리 DB에서 재시작 저장 유지·백업 checksum·dump 실패 후 재시작·SQL/uploads 복원·이미지 조회 통과**(`/tmp/monp-runtime.JH4BjjrW`, 프로세스 종료). 운영 백업 사본을 읽거나 운영 rollback/restore한 것은 아니다. root 파일 사전 점검 `check-recovery-readiness.sh`와 기본 계획 모드 SSH 복제 `replicate-monp.sh`를 준비했다. 복제 실패·손상·기존 사본 보존 로컬 대역 검증 통과. 외부 저장 대상 답변 대기, 원격 전송/타이머 설치 없음. sudo는 여전히 서버 터미널 인증 필요. 기존 15개 미커밋 변경을 보존했고 commit/push 없음. **Task 20~22 미완료 유지.**
+
+**2026-10-18 Codex 설정 후속:** 확인 당시 비어 있던 프로젝트 `.codex/config.toml`에 사용자 요청대로 `approval_policy = "never"`, `sandbox_mode = "workspace-write"`만 추가했다. 전역/다른 프로젝트 설정은 변경하지 않았다. TOML 파싱과 로컬 `codex doctor`의 approval Never 확인. 일반 shell 실행의 `bwrap: loopback: Failed RTM_NEWADDR: Operation not permitted`는 이 변경 전부터 재현됐고 아직 해결되지 않았다. 승인 생략과 샌드박스 초기화 오류는 별개이며 원인 확정/OS 보안 설정 변경은 하지 않았다.
+
+사용자가 2026-10-17 새 채팅으로 이동하기 전에 인수인계를 요청했다. **이번 창의 요청 작업은 모두 완료했고 실행 중인 배포나 테스트는 없다.** 디자인 확인용 로컬 preview/dev 서버도 종료했다. `/tmp`의 캡처·검증 스크립트는 참고용이며 없어도 운영에 영향이 없다.
+
+### 현재 작업공간과 읽을 문서
+
+- 실제 호스트: `coke-NucBox-G3` MiniPC. 작업 루트 `/home/coke/Desktop/code/monp_db_re`.
+- 읽는 순서: 이 문서 → [MONP_DB_IMPLEMENTATION_PLAN.md](MONP_DB_IMPLEMENTATION_PLAN.md)의 최신 진행 현황 → [SERVER_INFO.md](SERVER_INFO.md) → [PASSWORD_PUBLIC_ACCESS.md](PASSWORD_PUBLIC_ACCESS.md).
+- `SERVER_INFO.md`는 기존 portfolio 인프라 참고 문서이며 오래된 버전/경로가 섞여 있다. 현재 MONP 접속 방식은 이 최신 인수인계와 공개 비밀번호 가이드를 따른다.
+- Git 저장소는 `front/`다. 이 창에서 commit/push하지 않았다. 종료 시 `git -C front status --short`에 문서·슬러그 폼·디자인 관련 **15개 파일의 미커밋 수정**이 남아 있다. 기존 사용자 변경을 보존하며 시작 시 현재 diff를 확인한다. `back/`은 front Git 범위 밖이다.
+
+### 현재 운영 구성
+
+| 항목 | 현재 값/상태 |
+| --- | --- |
+| 웹 | `https://monpdb.vercel.app/` (Vercel Production) |
+| 공개 API base | `https://qbix-portfolio.shop/monp-api/api` (`/v1`은 client가 정규화) |
+| 접속 방식 | 최초 비밀번호 입력. Google OAuth·사용 기기의 Tailscale 설치 불필요 |
+| 최신 웹 배포 | `4v6E2Dm9bSUXRufzy2yQZMn19LBT` (2026-10-17 디자인 반영) |
+| Vercel 프로젝트 | `hyperquanxs-projects/monpdb`, 로컬 소스 직접 Production 배포 |
+| Production env | `VITE_DATA_MODE=http`, `VITE_API_BASE_URL=https://qbix-portfolio.shop/monp-api/api` |
+| API 내부 주소 | `127.0.0.1:8181`, Caddy `handle_path /monp-api/*`로 proxy |
+| 운영 경로 | `/opt/monp-api/current`, `/etc/monp/monp-api.env`, `/var/lib/monp-api/uploads` |
+| 서비스 | `monp-api.service`, `monp-backup.timer`, `caddy`, 기존 `portfolio-blue` (2026-10-16 active 확인) |
+| 서버 배포 rollback | `/var/backups/monp-password-release/20261015T055422Z` |
+
+단일 비밀번호는 서버 PBKDF2 hash로 관리한다. 평문 비밀번호·token·env secret·Vercel OIDC token을 문서/소스/로그에 기록하지 않는다. `front/.env.local` 및 Vercel 인증 파일의 내용을 출력하지 않는다. 8시간 token은 sessionStorage에 보관하고 서버 재시작/일일 백업 뒤에는 재접속이 필요하다. 기존 Tailscale 경로는 남아 있지만 현재 브라우저 API 주소는 공개 경로다. 이전 사설 주소로 되돌리거나 초기 설치 스크립트를 다시 실행하지 않는다.
+
+### 이번 창에서 완료한 변경과 검증
+
+1. 공개 비밀번호 배포 후 실제 새 브라우저에서 login/versions/works 200, refresh 유지, logout 204, 폐기 token 401 확인. 무인증 works 401, 기존 portfolio health 정상. 운영 사용자 작품/이미지를 생성·수정하는 검증은 하지 않았다.
+2. 작품 추가/수정의 슬러그 입력란 제거. 신규 내부 slug는 `work-${crypto.randomUUID()}`로 생성하며 수정 시 기존 값 유지. `WorkManagePage.jsx`, 기존 unit test와 `e2e/current-app.spec.js`를 수정했다. 운영 웹에 반영됐다.
+3. 사용자가 Apple/Meta 홈페이지처럼 모던한 디자인을 요청하여 청록색 테마를 흰색·차콜·회색으로 변경했다. 로그인 desktop 2열/mobile 1열, 큰 문구·넓은 여백, pill 버튼, 절제된 경계/그림자, 무채색 메뉴와 작품 홈을 적용했다. 사용자 표지·저장된 강조색 데이터는 보존한다. 신규 작품 기본 강조색은 회색이며 키보드 focus는 파란색이다.
+4. 최신 변경 검증: 로그인/작품 선택/관리 **unit 5개**, 주요 화면 desktop/mobile WCAG 및 작품 관리 **Playwright 11개**, lint/build, git diff --check 통과. 로그인·선택·홈 **1440/390/320px overflow 0** 및 로그인 WCAG 통과, 캡처 직접 확인. 실제 공개 주소의 새 모바일 Chromium에서 HTTP 200, 새 로그인 문구, 차콜 버튼 `rgb(32, 33, 36)`, overflow 0·페이지 오류 0 확인.
+5. 이전 전체 검증 이력: backend 38 tests, frontend 46 files/316 tests, 공개 prefix HTTP E2E 3/3, 분리 SQL/uploads 복원 통과. 이는 비밀번호 구현 당시의 전체 실행 결과이며 디자인 변경 뒤 전체 suite를 재실행한 것은 아니다.
+
+주요 디자인 파일은 `src/styles/{tokens,global}.css`, `src/components/PasswordGate.{jsx,module.css}`, `src/components/layout/{Header,WorkNavigation}.module.css`, `src/shared/ui/primitives.module.css`, `src/layouts/RootLayout.module.css`, `src/features/works/pages/{WorkSelectionPage,WorkHomePage}.module.css`다(front 기준).
+
+### 이어서 할 작업과 작업 시 주의점
+
+- **Task 20:** 다른 물리 PC/모바일·외부 회선에서 실제 조회/저장 확인, 운영 rollback/복구 훈련, off-host 백업 복제는 아직 남아 있다. 새 브라우저 검증을 외부 실기기 검증으로 처리하지 않는다. off-host 대상은 아직 정해지지 않았다. 운영 복원으로 사용자 데이터를 덮어쓰기 전에 대상/시점이 확정돼야 한다.
+- **Task 21:** Capacitor iOS scaffold·앱 자산은 준비됐지만 Mac/Xcode 빌드·iPhone 실기기 검증은 남아 있다. MiniPC에서 완료로 표시하지 않는다.
+- **Task 22:** 웹/백엔드/MiniPC/iPhone 최종 통합은 위 미완료 범위를 포함하므로 완료 처리하지 않는다.
+- 최신 요청은 인수인계 저장이다. 이 창에서 서버 재설치, 추가 기능, DB 변경, Git commit/push는 하지 않았다. 새 사용자의 요청에 맞춰 다음 작업을 진행한다.
+- frontend 배포가 필요한 수정은 검증 후 저장소 루트에서 `bash back/deploy/publish-password-web.sh`를 사용한다. 기존 프로젝트와 공개 API env를 확인하며 Git push 없이 로컬 소스를 배포한다. 단순 Git 기반 Redeploy는 미커밋 소스를 반영하지 못한다.
+- sudo 비밀번호를 chat에서 요구하거나 기록하지 않는다. 필요한 경우 사용자가 터미널에서 인증한다. 과거 정상 완료된 설치나 Vercel 로그인 절차를 이유 없이 반복하지 않는다.
+- MiniPC에서 무거운 전체 frontend suite와 backend build를 병행하면 timeout이 발생했던 이력이 있다. 전체 frontend는 `--maxWorkers=1`로 단독 실행하고 변경에 맞는 검증부터 수행한다.
+
+## 이전 상세 진행 이력
+
+아래 기록에는 각 시점의 미설치·미배포·미승인 설명이 남아 있다. 현재 상태와 충돌하면 위 최신 인수인계가 우선한다.
 
 ## 작업 위치와 운영 원칙
+
+- **2026-10-17 디자인 후속 운영 반영 완료:** 공통 청록색을 white/charcoal/gray 테마로 전환했다. 로그인 desktop 2열/mobile 1열·대형 문구, 무채색 버튼/카드/탐색/작품 홈, 얇은 경계와 절제된 그림자를 적용했다. 기존 사용자 데이터·표지는 유지한다. 로그인/작품 선택/관리 단위 5개, WCAG/작품 관리 E2E 11개, lint/build 통과. 로그인/선택/홈 1440·390·320px overflow 0, 로그인 WCAG 통과, 캡처 확인. Vercel production `4v6E2Dm9bSUXRufzy2yQZMn19LBT` 배포 완료, 실제 공개 주소 새 브라우저에서 새 디자인·차콜 버튼·390px overflow 0·페이지 오류 0 확인. 서버/DB 변경·Git commit/push 없음.
+
+- **2026-10-16 작품 폼 후속 반영:** 사용자 요청으로 작품 추가/수정의 슬러그 입력을 제거했다. 신규 slug는 UUID 자동 생성, 수정은 기존 값 보존. WorkManagePage 기존 단위 테스트 및 작품 관리 Chromium 여정, lint/build 통과. Vercel production `EX4k7LfmSijGTUumAKGAbbJBddrE` 배포와 공개 bundle 반영 확인 완료. 서버/API 변경 없음. 아래 최초 비밀번호 배포 ID는 이전 배포 이력이다.
 
 - **최우선 현재 상태(2026-10-16): 공개 비밀번호 운영 배포·새 브라우저 검증 완료.** 사용자가 서버 deploy-password-access와 Vercel publish-password-web을 성공시켰다. 웹 `https://monpdb.vercel.app/`, API base `https://qbix-portfolio.shop/monp-api/api`. 인증 정보 없는 새 Chromium에서 로컬 네트워크 권한 부여 없이 최초 gate·login 200·versions/works 200·refresh 유지·logout 204·폐기 token 401, 페이지 오류 0 확인. 비인증 works 401, 양쪽 health 정상, API/backup timer/Caddy/portfolio-blue active. 작품/이미지 데이터 변경 없음. 운영 rollback `/var/backups/monp-password-release/20261015T055422Z`, Vercel deployment `56TYHtUN3ijkNBNMewzmmKZ6jsjj`. 별도 PC/모바일 외부 회선·저장·운영 rollback/restore·off-host 복제·Mac/iPhone 검증은 남아 있다. 계획서와 [PASSWORD_PUBLIC_ACCESS.md](PASSWORD_PUBLIC_ACCESS.md)에 저장했다. 아래 미배포/sudo/Vercel/Tailscale-only 설명은 과거 기록이다. 재설치·재로그인·Git commit/push를 실행하지 않는다.
 

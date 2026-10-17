@@ -14,9 +14,9 @@
 }
 
 .hero {
-  max-width: 760px;
+  max-width: 900px;
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-5);
 }
 
 .brand {
@@ -24,7 +24,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  color: var(--color-accent);
+  color: var(--color-text-primary);
   font-weight: 750;
   letter-spacing: -0.03em;
 }
@@ -33,12 +33,12 @@
   width: 32px;
   height: 32px;
   border-radius: 10px;
-  box-shadow: var(--shadow-control);
+  filter: grayscale(1);
 }
 
 .eyebrow,
 .genre {
-  color: var(--color-accent);
+  color: var(--color-text-tertiary);
   font-size: var(--font-size-caption);
   font-weight: 750;
   letter-spacing: 0.08em;
@@ -46,11 +46,12 @@
 }
 
 .hero h1 {
-  max-width: 720px;
-  font-size: clamp(2.25rem, 8vw, 5rem);
-  font-weight: 760;
+  max-width: 900px;
+  font-size: clamp(2.5rem, 6vw, 4.75rem);
+  font-weight: 650;
   letter-spacing: -0.065em;
-  line-height: 0.98;
+  line-height: 1.18;
+  word-break: keep-all;
 }
 
 .intro {
@@ -74,15 +75,14 @@
 
 .card::before {
   content: "";
-  height: 4px;
-  background: var(--work-accent);
+  display: none;
 }
 
 .cover {
   position: relative;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
-  background: color-mix(in srgb, var(--work-accent) 18%, var(--color-fill-tertiary));
+  background: linear-gradient(145deg, #f0f0f2, #e5e5e9);
 }
 
 .cover img {
@@ -96,9 +96,10 @@
   height: 100%;
   display: grid;
   place-items: center;
-  color: var(--work-accent);
+  color: #55565e;
   font-size: clamp(3rem, 12vw, 6rem);
-  font-weight: 800;
+  font-weight: 500;
+  letter-spacing: -0.08em;
 }
 
 .status {
@@ -109,7 +110,7 @@
   border-radius: var(--radius-pill);
   padding: 5px 10px;
   color: #ffffff;
-  background: rgb(0 0 0 / 48%);
+  background: rgb(29 29 31 / 76%);
   font-size: 0.75rem;
   font-weight: 700;
   backdrop-filter: blur(12px);
@@ -125,7 +126,7 @@
 .content h2 {
   margin-top: var(--space-1);
   font-size: clamp(1.5rem, 4vw, 2rem);
-  font-weight: 740;
+  font-weight: 650;
   letter-spacing: -0.045em;
 }
 
@@ -147,6 +148,7 @@
 .content button {
   width: 100%;
   margin-top: auto;
+  border-radius: var(--radius-pill);
 }
 
 .loading,

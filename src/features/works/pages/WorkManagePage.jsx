@@ -11,13 +11,12 @@ import styles from "./WorkManagePage.module.css";
 
 const initialDraft = {
   title: "",
-  slug: "",
   subtitle: "",
   cover: "",
   summary: "",
   genre: "",
   status: "planning",
-  accentColor: "#245c4f",
+  accentColor: "#55565e",
 };
 
 const statusLabels = {
@@ -47,7 +46,7 @@ function WorkManagePage({ repository = workRepository }) {
     mutationFn: () =>
       editingWorkId
         ? repository.update(editingWorkId, draft)
-        : repository.create(draft),
+        : repository.create({ ...draft, slug: `work-${crypto.randomUUID()}` }),
     onSuccess: (work) => {
       refreshWorks(work);
       setEditingWorkId(null);
@@ -138,15 +137,6 @@ function WorkManagePage({ repository = workRepository }) {
             />
           </label>
           <label>
-            <span>슬러그</span>
-            <Input
-              pattern="[a-zA-Z0-9-]+"
-              required
-              value={draft.slug}
-              onChange={(event) => handleDraftChange("slug", event.target.value)}
-            />
-          </label>
-          <label>
             <span>부제</span>
             <Input
               value={draft.subtitle}
@@ -213,7 +203,7 @@ function WorkManagePage({ repository = workRepository }) {
             </Button>
           ) : null}
           <Button
-            disabled={saveMutation.isPending || !draft.title.trim() || !draft.slug.trim()}
+            disabled={saveMutation.isPending || !draft.title.trim()}
             type="submit"
           >
             {editingWorkId ? "변경 저장" : "작품 추가"}
