@@ -52,9 +52,12 @@
   gap: var(--space-2);
   border-bottom: 1px solid var(--color-border-strong);
   text-align: center;
+  background: var(--name-header-bg, var(--color-surface));
+  color: var(--name-header-text, var(--color-text-primary));
 }
 
 .nameHeader h2 {
+  color: inherit;
   font-size: 1.25rem;
   font-weight: 650;
   letter-spacing: -0.035em;
@@ -62,8 +65,9 @@
 }
 
 .nameHeader p {
-  color: var(--color-text-secondary);
+  color: inherit;
   font-size: 0.875rem;
+  font-weight: 700;
 }
 
 .portraitFrame {
@@ -116,6 +120,7 @@
   color: var(--profile-label-text);
   background: var(--profile-label-bg);
   font-size: 0.875rem;
+  font-weight: 700;
   text-align: center;
   border-bottom: 1px solid #ffffff;
 }
@@ -130,10 +135,11 @@
   display: flex;
   align-items: center;
   overflow-wrap: anywhere;
+  white-space: pre-wrap;
   color: var(--color-text-primary);
   background: var(--color-surface);
   font-size: 0.9375rem;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .relationGrid {

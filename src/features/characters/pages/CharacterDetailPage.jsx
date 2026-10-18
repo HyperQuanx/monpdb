@@ -182,7 +182,13 @@ function CharacterDetailContent({
       </div>
 
       <div className={styles.sheet}>
-        <header className={styles.nameHeader}>
+        <header
+          className={styles.nameHeader}
+          style={{
+            "--name-header-bg": profileTheme.labelBackground,
+            "--name-header-text": labelText,
+          }}
+        >
           <h2>{character.name}</h2>
           <p>
             {displayValue(character.hanjaName)} |{" "}
