@@ -10,11 +10,28 @@
 
 - 작업 루트 `/home/coke/Desktop/code/monp_db_re`, Git 저장소는 `front/`다. 아래 파일 경로는 별도 표시가 없으면 **front 기준**이다. `back/`은 이 Git 저장소 밖에 있다.
 - 운영 웹 `https://monpdb.vercel.app/`. 공개 비밀번호 접속·흰색/차콜 디자인 배포 완료. 공개 API는 `https://qbix-portfolio.shop/monp-api/api`다.
-- 최신 배포 `FqEoxYoWrBHjkeXeTfzpaAY7DwFX`: 입력폼 포커스 표시 제거까지 반영됐다. 아래 소스는 이미 배포됐어도 미커밋 상태일 수 있다.
-- 최근 수정: `src/styles/global.css`, 7종 `*EditorPage.module.css`, `src/shared/editor/RichTextEditor.module.css`. input/textarea/select의 공통 파란 그림자, 각 편집폼의 포커스 border 변경, 본문 frame의 포커스 그림자를 제거했다. **이것을 회귀로 보고 복구하지 않는다.** 버튼·링크의 키보드 포커스는 기존대로 남아 있다.
+- 최근 배포 `FqEoxYoWrBHjkeXeTfzpaAY7DwFX`: 배포 후 추가 수정 진행 중.
 - 사용자 표지·작품 강조색·캐릭터 테마색 등 저장된 데이터는 보존한다. 페이지 CSS 수정 때문에 데이터의 색상값을 일괄 변경하지 않는다.
 - 작품 추가/수정의 slug 입력란은 사용자가 요청해서 제거했다. 내부 UUID 자동 생성 및 기존 slug 보존을 유지한다.
 - Task 20 외부 기기·운영 복구·외부 백업, Task 21 Mac/iPhone, Task 22 최종 통합은 별도 진행 중이다. 스타일 조정으로 이를 완료 처리하지 않는다.
+
+## 최근 스타일 수정 이력
+
+### 2026-10-19 캐릭터 상세 페이지 (`CharacterDetailPage`) 조정 (참고: `character방법.png`)
+- **시트와 프로필 표 밀착**: `<div className={styles.sheet}>`와 `<dl className={styles.profileTable}>`를 분리 유지한 채, `.sheet + .profileTable { margin-top: calc(var(--space-4) * -1); }`로 상단 그리드 gap을 상쇄하여 단일 카드 형태로 붙임.
+- **이름 헤더 스타일**: 이름 `1.25rem` 중앙 정렬, 한자/영문 `0.875rem` 볼드(`font-weight: 700`), 헤더 배경색 및 텍스트 색상을 캐릭터 라벨 테마(`--name-header-bg`, `--name-header-text`)와 연동(`color: inherit`).
+- **프로필 라벨(`dt`)**: 수평 중앙 정렬(`justify-content: center`), 볼드(`font-weight: 700`), 위아래 흰색 구분선(`border-bottom: 1px solid #ffffff`).
+- **프로필 값(`dd`) 개행 보존**: 편집기에서 입력한 줄바꿈/내려쓰기가 상세 조회에서도 그대로 표시되도록 `white-space: pre-wrap; line-height: 1.6;` 적용.
+- **이미지 URL 필드 제거**: `CharacterDetailPage.jsx`의 `profileFields` 목록에서 `imageUrl` 항목을 제외하여 표 내 이미지 URL 행 노출 제거 (사진은 상단 3:4 프레임으로 표시).
+
+### 2026-10-19 입력 폼 포커스 스타일 정비
+- **사용자 요구**: 포커스 시 번지는 파란 그림자(`box-shadow`)만 배제하고, 테두리가 바뀌어 포커스 느낌이 확실히 나도록 요구.
+- **스타일 확정**: 모던 화이트/차콜 테마에 맞춰 `box-shadow: none;` 유지 및 짙은 차콜 테두리(`border-color: var(--color-accent, #202124)`)와 부드러운 전환 효과(`transition: border-color var(--duration-fast) var(--ease-standard)`) 적용.
+- **반영 파일**:
+  - `src/styles/global.css`: 전역 `input`, `textarea`, `select`의 focus / focus-visible 스타일
+  - `src/shared/ui/primitives.module.css`: `.input:focus`, `.input:focus-visible`
+  - `src/shared/editor/RichTextEditor.module.css`: `.editorFrame:focus-within`
+  - 7종 편집기 CSS (`CharacterEditorPage`, `ContentEditorPage`, `IdeaEditorPage`, `MemoEditorPage`, `PlotEditorPage`, `SettingEditorPage`, `WorldEditorPage`)의 `.control:focus`, `.textarea:focus`, `.field input:focus` 등
 
 ## 어느 범위의 스타일인지 먼저 구분
 

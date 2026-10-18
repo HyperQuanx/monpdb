@@ -93,7 +93,6 @@ function CharacterDetailContent({
     ["name", "이름", character.name],
     ["hanjaName", "한자 이름", character.hanjaName],
     ["englishName", "영문 이름", character.englishName],
-    ["imageUrl", "이미지 URL", character.imageUrl],
     ["species", "종족", character.species],
     ["birthplace", "출생지", character.birthplace],
     [branchField[0], branchField[1], character[branchField[0]]],
