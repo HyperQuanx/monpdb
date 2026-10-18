@@ -112,7 +112,7 @@
   color: var(--profile-label-text);
   background: var(--profile-label-bg);
   font-size: 0.875rem;
-  text-align: right;
+  text-align: center;
 }
 
 .profileRow dd {

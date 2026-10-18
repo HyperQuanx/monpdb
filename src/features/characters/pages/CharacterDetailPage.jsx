@@ -1,10 +1,7 @@
 import { useMemo } from "react";
 import { Link, useOutletContext, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  characterEditPath,
-  characterListPath,
-} from "../../../app/paths";
+import { characterEditPath, characterListPath } from "../../../app/paths";
 import {
   characterQueryKeys,
   characterRepository,
@@ -14,10 +11,7 @@ import {
   relationRepository,
 } from "../../../data/repositories/appRepositories";
 import { Button, Skeleton } from "../../../shared/ui";
-import {
-  getReadableTextColor,
-  sameEndpoint,
-} from "../characterForm";
+import { getReadableTextColor, sameEndpoint } from "../characterForm";
 import CharacterPortrait from "../components/CharacterPortrait";
 import styles from "./CharacterDetailPage.module.css";
 
@@ -29,7 +23,10 @@ const isAllRegion = (menuItem) =>
 
 function RelationList({ candidates, relations, source, type }) {
   const labels = new Map(
-    candidates.map((candidate) => [endpointKey(candidate.endpoint), candidate.label]),
+    candidates.map((candidate) => [
+      endpointKey(candidate.endpoint),
+      candidate.label,
+    ]),
   );
   const visibleRelations = relations.filter((relation) =>
     type === "outgoing"
@@ -47,11 +44,16 @@ function RelationList({ candidates, relations, source, type }) {
       ) : (
         <ul>
           {visibleRelations.map((relation) => {
-            const other = type === "outgoing" ? relation.target : relation.source;
+            const other =
+              type === "outgoing" ? relation.target : relation.source;
             return (
               <li key={relation.id}>
-                <strong>{labels.get(endpointKey(other)) ?? "알 수 없는 항목"}</strong>
-                <span>{relation.label} · {relation.relationType}</span>
+                <strong>
+                  {labels.get(endpointKey(other)) ?? "알 수 없는 항목"}
+                </strong>
+                <span>
+                  {relation.label} · {relation.relationType}
+                </span>
                 {relation.notes ? <small>{relation.notes}</small> : null}
               </li>
             );
@@ -85,9 +87,7 @@ function CharacterDetailContent({
     ? getReadableTextColor(profileTheme.labelBackground)
     : profileTheme.labelText;
   const branchField =
-    character.species === "마물"
-      ? ["type", "마물 구분"]
-      : ["gender", "성별"];
+    character.species === "마물" ? ["type", "마물 구분"] : ["gender", "성별"];
   const profileFields = [
     ["regionId", "지역", regionLabel],
     ["name", "이름", character.name],
@@ -115,7 +115,11 @@ function CharacterDetailContent({
     ["notes", "특이사항", character.notes],
     ["labelBackground", "라벨 배경색", profileTheme.labelBackground],
     ["labelText", "라벨 글자색", profileTheme.labelText],
-    ["autoText", "글자색 자동 선택", profileTheme.autoText ? "사용" : "사용 안 함"],
+    [
+      "autoText",
+      "글자색 자동 선택",
+      profileTheme.autoText ? "사용" : "사용 안 함",
+    ],
   ];
 
   const archiveMutation = useMutation({
@@ -129,8 +133,12 @@ function CharacterDetailContent({
         updatedCharacter,
       );
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: characterQueryKeys.all(workId) }),
-        queryClient.invalidateQueries({ queryKey: relationQueryKeys.all(workId) }),
+        queryClient.invalidateQueries({
+          queryKey: characterQueryKeys.all(workId),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: relationQueryKeys.all(workId),
+        }),
       ]);
     },
   });
@@ -176,27 +184,29 @@ function CharacterDetailContent({
       <div className={styles.sheet}>
         <header className={styles.nameHeader}>
           <h2>{character.name}</h2>
-          <p>{displayValue(character.hanjaName)} | {displayValue(character.englishName)}</p>
+          <p>
+            {displayValue(character.hanjaName)} |{" "}
+            {displayValue(character.englishName)}
+          </p>
         </header>
         <div className={styles.portraitFrame}>
           <CharacterPortrait character={character} />
         </div>
+        <dl
+          className={styles.profileTable}
+          style={{
+            "--profile-label-bg": profileTheme.labelBackground,
+            "--profile-label-text": labelText,
+          }}
+        >
+          {profileFields.map(([key, label, value]) => (
+            <div className={styles.profileRow} key={key}>
+              <dt>{label}</dt>
+              <dd>{displayValue(value)}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
-
-      <dl
-        className={styles.profileTable}
-        style={{
-          "--profile-label-bg": profileTheme.labelBackground,
-          "--profile-label-text": labelText,
-        }}
-      >
-        {profileFields.map(([key, label, value]) => (
-          <div className={styles.profileRow} key={key}>
-            <dt>{label}</dt>
-            <dd>{displayValue(value)}</dd>
-          </div>
-        ))}
-      </dl>
 
       <div className={styles.relationGrid}>
         <RelationList
@@ -219,7 +229,10 @@ function CharacterDetailContent({
         </p>
       ) : null}
 
-      <Link className={styles.backLink} to={characterListPath(workId, menuItem.id)}>
+      <Link
+        className={styles.backLink}
+        to={characterListPath(workId, menuItem.id)}
+      >
         {menuItem.label} 목록으로
       </Link>
     </article>
@@ -251,9 +264,10 @@ function CharacterDetailPage({
     ? isAllRegion(menuItem) || character.regionId === menuItem.id
     : false;
   const source = useMemo(
-    () => character
-      ? { type: character.resourceType, id: character.id }
-      : undefined,
+    () =>
+      character
+        ? { type: character.resourceType, id: character.id }
+        : undefined,
     [character],
   );
   const relationsQuery = useQuery({
