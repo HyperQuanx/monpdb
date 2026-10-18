@@ -35,9 +35,8 @@ body {
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  border-color: var(--color-focus-ring);
   outline: 0;
-  box-shadow: 0 0 0 3px rgb(0 102 204 / 16%);
+  box-shadow: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

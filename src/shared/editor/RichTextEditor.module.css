@@ -78,11 +78,6 @@
     box-shadow var(--duration-fast, 140ms) var(--ease-standard, ease);
 }
 
-.editorFrame:focus-within {
-  border-color: var(--color-focus-ring, #147d64);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus-ring, #147d64) 24%, transparent);
-}
-
 .editorContent {
   min-height: 180px;
 }

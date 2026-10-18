@@ -5,6 +5,10 @@
 
 ## 새 채팅 시작 시 먼저 읽을 최신 인수인계
 
+**페이지 스타일 조정 인수인계:** 다음 에이전트가 여러 페이지의 여백·입력폼·글자·카드 등을 미세 조정할 때는 [STYLE_HANDOFF.md](STYLE_HANDOFF.md)를 먼저 읽는다. 공통/페이지별 CSS 지도, 실제 route·fixture URL, 최근 포커스 제거 요구, 검증·Vercel 배포 방법을 정리했다.
+
+**2026-10-18 입력폼 포커스 표시 제거:** 사용자 요청으로 공통 input/textarea/select의 파란 그림자와 캐릭터·세계관·플롯·설정·아이디어·메모·일반 콘텐츠 편집폼의 포커스 테두리 변경을 제거했다. 공통 리치 텍스트 본문 frame의 포커스 그림자도 제거했다. 버튼/링크의 기존 키보드 focus는 유지한다. lint/build 및 모바일 크기 Chromium에서 캐릭터 이름·지역·요약·본문의 focus 전후 테두리/outline/shadow, 페이지 오류 0 확인. Vercel production `FqEoxYoWrBHjkeXeTfzpaAY7DwFX` 배포 완료, 공개 주소의 공통·캐릭터 편집·본문 CSS가 검증된 빌드와 바이트 일치 확인. 로컬 검증 서버 종료, 운영 데이터/API 변경·Git commit/push 없음. 아래 2026-10-17 디자인 배포 ID는 이전 배포다.
+
 **사용자 외부 기기 테스트 진행 중(2026-10-18):** 접속은 문제없이 성공했다고 보고했다. 장치/회선 상세·조회/생성/수정/저장 유지 결과는 아직 미수신이며 접속 성공만 확인된 상태다.
 
 **2026-10-18 Task 20 후속:** [TASK20_OPERATIONS_CHECKLIST.md](TASK20_OPERATIONS_CHECKLIST.md)에 실제 외부 PC/모바일 조회·생성·수정·독립 장치 저장 유지, 운영 rollback/복구의 대상·시점 확인, off-host 복제 절차를 추가했다. 공개 웹/API/CORS·서비스/backup timer 정상, 3306/8181 loopback 확인. `bash back/deploy/verify-runtime.sh` 재실행으로 **분리 DB에서 재시작 저장 유지·백업 checksum·dump 실패 후 재시작·SQL/uploads 복원·이미지 조회 통과**(`/tmp/monp-runtime.JH4BjjrW`, 프로세스 종료). 운영 백업 사본을 읽거나 운영 rollback/restore한 것은 아니다. root 파일 사전 점검 `check-recovery-readiness.sh`와 기본 계획 모드 SSH 복제 `replicate-monp.sh`를 준비했다. 복제 실패·손상·기존 사본 보존 로컬 대역 검증 통과. 외부 저장 대상 답변 대기, 원격 전송/타이머 설치 없음. sudo는 여전히 서버 터미널 인증 필요. 기존 15개 미커밋 변경을 보존했고 commit/push 없음. **Task 20~22 미완료 유지.**

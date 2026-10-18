@@ -60,12 +60,6 @@
   resize: vertical;
 }
 
-.control:focus-visible,
-.textarea:focus-visible {
-  border-color: var(--color-focus-ring);
-  box-shadow: 0 0 0 3px rgb(20 125 100 / 14%);
-}
-
 .fieldError,
 .formError {
   color: var(--color-danger);
