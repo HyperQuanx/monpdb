@@ -18,6 +18,10 @@ function Main() {
     const timer = setInterval(() => { if (!online) httpClient.probe(); }, 15_000);
     return () => clearInterval(timer);
   }, [online, queryClient]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
   return (
     <main className={styles.main}>
       {offline ? <p role="status">오프라인 · 저장된 텍스트를 읽을 수 있습니다. 수정하려면 서버에 연결해 주세요.</p> : null}
