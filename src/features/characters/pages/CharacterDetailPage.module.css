@@ -55,7 +55,7 @@
 }
 
 .nameHeader h2 {
-  font-size: clamp(1.375rem, 5vw, 1.75rem);
+  font-size: 1.25rem;
   font-weight: 650;
   letter-spacing: -0.035em;
   line-height: 1.15;
@@ -63,7 +63,7 @@
 
 .nameHeader p {
   color: var(--color-text-secondary);
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
 }
 
 .portraitFrame {
@@ -79,6 +79,10 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.sheet + .profileTable {
+  margin-top: calc(var(--space-4) * -1);
 }
 
 .profileTable {
@@ -108,11 +112,16 @@
   padding: var(--space-2) var(--space-3);
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   color: var(--profile-label-text);
   background: var(--profile-label-bg);
   font-size: 0.875rem;
   text-align: center;
+  border-bottom: 1px solid #ffffff;
+}
+
+.profileRow:last-child dt {
+  border-bottom: 0;
 }
 
 .profileRow dd {

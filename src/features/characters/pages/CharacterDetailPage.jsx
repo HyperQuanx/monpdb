@@ -192,21 +192,22 @@ function CharacterDetailContent({
         <div className={styles.portraitFrame}>
           <CharacterPortrait character={character} />
         </div>
-        <dl
-          className={styles.profileTable}
-          style={{
-            "--profile-label-bg": profileTheme.labelBackground,
-            "--profile-label-text": labelText,
-          }}
-        >
-          {profileFields.map(([key, label, value]) => (
-            <div className={styles.profileRow} key={key}>
-              <dt>{label}</dt>
-              <dd>{displayValue(value)}</dd>
-            </div>
-          ))}
-        </dl>
       </div>
+
+      <dl
+        className={styles.profileTable}
+        style={{
+          "--profile-label-bg": profileTheme.labelBackground,
+          "--profile-label-text": labelText,
+        }}
+      >
+        {profileFields.map(([key, label, value]) => (
+          <div className={styles.profileRow} key={key}>
+            <dt>{label}</dt>
+            <dd>{displayValue(value)}</dd>
+          </div>
+        ))}
+      </dl>
 
       <div className={styles.relationGrid}>
         <RelationList
