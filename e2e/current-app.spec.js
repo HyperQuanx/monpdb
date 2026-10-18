@@ -356,7 +356,7 @@ test("completes the character create relation edit archive restore journey", asy
     page.getByText("초상 이미지를 불러오지 못해 기본 이미지를 표시합니다."),
   ).toBeVisible();
   await expect(
-    page.getByRole("region", { name: "나가는 관계" }).getByText("동부평야지대"),
+    page.getByRole("region", { name: "캐릭터 관계" }).getByText("동부평야지대"),
   ).toBeVisible();
 
   await page.getByRole("link", { name: "편집" }).click();
@@ -378,7 +378,7 @@ test("completes the character create relation edit archive restore journey", asy
   await page.getByRole("button", { name: "보관" }).click();
   await expect(page.getByText("보관된 캐릭터입니다.")).toBeVisible();
   await expect(
-    page.getByRole("region", { name: "나가는 관계" }).getByText("동부평야지대"),
+    page.getByRole("region", { name: "캐릭터 관계" }).getByText("동부평야지대"),
   ).toBeVisible();
   await page.getByRole("link", { name: "암수굴 목록으로" }).click();
   // Wait for the list route before asserting the archived card is hidden;
@@ -403,7 +403,7 @@ test("completes the character create relation edit archive restore journey", asy
   await expect(restoredCharacter).toContainText("하린 그림자");
   await restoredCharacter.click();
   await expect(
-    page.getByRole("region", { name: "나가는 관계" }).getByText("동부평야지대"),
+    page.getByRole("region", { name: "캐릭터 관계" }).getByText("동부평야지대"),
   ).toBeVisible();
 
   await page.getByRole("button", { name: "메뉴", exact: true }).click();

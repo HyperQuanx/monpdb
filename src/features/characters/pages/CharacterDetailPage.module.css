@@ -184,6 +184,21 @@
   overflow-wrap: anywhere;
 }
 
+.relationLink {
+  color: var(--color-text-primary);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.relationLink:hover {
+  text-decoration: underline;
+}
+
+.archivedBadge {
+  color: var(--color-text-tertiary);
+  font-size: 0.8125rem;
+}
+
 .backLink {
   min-height: var(--control-min-height);
   margin-top: var(--space-2);

@@ -11,6 +11,7 @@ import {
   relationRepository,
 } from "../../../data/repositories/appRepositories";
 import { Button, Skeleton } from "../../../shared/ui";
+import { relationCandidatePath } from "../../../shared/relations/relationDrafts";
 import { getReadableTextColor, sameEndpoint } from "../characterForm";
 import CharacterPortrait from "../components/CharacterPortrait";
 import styles from "./CharacterDetailPage.module.css";
@@ -21,39 +22,47 @@ const endpointKey = (endpoint) =>
 const isAllRegion = (menuItem) =>
   menuItem.id === "characters00" || menuItem.filterConfig?.scope === "all";
 
-function RelationList({ candidates, relations, source, type }) {
-  const labels = new Map(
-    candidates.map((candidate) => [
-      endpointKey(candidate.endpoint),
-      candidate.label,
-    ]),
-  );
-  const visibleRelations = relations.filter((relation) =>
-    type === "outgoing"
-      ? sameEndpoint(relation.source, source)
-      : !sameEndpoint(relation.source, source),
+function RelationList({ candidates, relations, source, workId }) {
+  const candidateMap = useMemo(
+    () =>
+      new Map(
+        candidates.map((candidate) => [
+          endpointKey(candidate.endpoint),
+          candidate,
+        ]),
+      ),
+    [candidates],
   );
 
   return (
-    <section className={styles.relations} aria-labelledby={`${type}-relations`}>
-      <h3 id={`${type}-relations`}>
-        {type === "outgoing" ? "나가는 관계" : "들어오는 관계"}
-      </h3>
-      {visibleRelations.length === 0 ? (
+    <section className={styles.relations} aria-labelledby="character-relations">
+      <h3 id="character-relations">캐릭터 관계</h3>
+      {relations.length === 0 ? (
         <p>연결된 관계가 없습니다.</p>
       ) : (
         <ul>
-          {visibleRelations.map((relation) => {
-            const other =
-              type === "outgoing" ? relation.target : relation.source;
+          {relations.map((relation) => {
+            const isOutgoing = sameEndpoint(relation.source, source);
+            const other = isOutgoing ? relation.target : relation.source;
+            const candidate = candidateMap.get(endpointKey(other));
+            const path = relationCandidatePath(workId, candidate);
+            const label = candidate?.label ?? `${other.type}:${other.id}`;
+
             return (
               <li key={relation.id}>
-                <strong>
-                  {labels.get(endpointKey(other)) ?? "알 수 없는 항목"}
-                </strong>
-                <span>
-                  {relation.label} · {relation.relationType}
-                </span>
+                <div>
+                  {path ? (
+                    <Link to={path} className={styles.relationLink}>
+                      {label}
+                    </Link>
+                  ) : (
+                    <strong>{label}</strong>
+                  )}
+                  {candidate?.archivedAt ? (
+                    <span className={styles.archivedBadge}> (보관됨)</span>
+                  ) : null}
+                </div>
+                <span>{relation.label}</span>
                 {relation.notes ? <small>{relation.notes}</small> : null}
               </li>
             );
@@ -212,13 +221,7 @@ function CharacterDetailContent({
           candidates={candidates}
           relations={relationRecords}
           source={source}
-          type="outgoing"
-        />
-        <RelationList
-          candidates={candidates}
-          relations={relationRecords}
-          source={source}
-          type="incoming"
+          workId={workId}
         />
       </div>
 
