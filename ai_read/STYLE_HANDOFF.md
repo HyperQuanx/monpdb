@@ -23,6 +23,7 @@
 - **프로필 라벨(`dt`)**: 수평 중앙 정렬(`justify-content: center`), 볼드(`font-weight: 700`), 위아래 흰색 구분선(`border-bottom: 1px solid #ffffff`).
 - **프로필 값(`dd`) 개행 보존**: 편집기에서 입력한 줄바꿈/내려쓰기가 상세 조회에서도 그대로 표시되도록 `white-space: pre-wrap; line-height: 1.6;` 적용.
 - **이미지 URL 필드 제거**: `CharacterDetailPage.jsx`의 `profileFields` 목록에서 `imageUrl` 항목을 제외하여 표 내 이미지 URL 행 노출 제거 (사진은 상단 3:4 프레임으로 표시).
+- **테마 설정 필드 제거**: `labelBackground` (라벨 배경색), `labelText` (라벨 글자색), `autoText` (글자색 자동 선택) 3개 항목을 `profileFields`에서 제외하여 상세 조회 표 내 불필요한 메타데이터 행 노출 제거.
 
 ### 2026-10-19 입력 폼 포커스 스타일 정비
 - **사용자 요구**: 포커스 시 번지는 파란 그림자(`box-shadow`)만 배제하고, 테두리가 바뀌어 포커스 느낌이 확실히 나도록 요구.

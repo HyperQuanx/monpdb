@@ -11,10 +11,7 @@
   width: min(100%, var(--app-max-width));
   min-height: calc(var(--header-height) + var(--safe-area-top));
   margin: 0 auto;
-  padding:
-    var(--safe-area-top)
-    max(var(--app-gutter), var(--safe-area-right))
-    0
+  padding: var(--safe-area-top) max(var(--app-gutter), var(--safe-area-right)) 0
     max(var(--app-gutter), var(--safe-area-left));
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, auto) minmax(0, 1fr);
@@ -37,7 +34,7 @@
   height: 28px;
   flex: 0 0 auto;
   border-radius: 9px;
-  object-fit: cover;
+  object-fit: contain;
   filter: grayscale(1);
   box-shadow: 0 1px 3px rgb(0 0 0 / 18%);
 }

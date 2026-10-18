@@ -112,13 +112,6 @@ function CharacterDetailContent({
     ["themeSong", "테마곡", character.themeSong],
     ["summary", "요약", character.summary],
     ["notes", "특이사항", character.notes],
-    ["labelBackground", "라벨 배경색", profileTheme.labelBackground],
-    ["labelText", "라벨 글자색", profileTheme.labelText],
-    [
-      "autoText",
-      "글자색 자동 선택",
-      profileTheme.autoText ? "사용" : "사용 안 함",
-    ],
   ];
 
   const archiveMutation = useMutation({
