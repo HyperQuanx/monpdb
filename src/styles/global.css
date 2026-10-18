@@ -32,9 +32,19 @@ body {
   outline-offset: 3px;
 }
 
+input,
+textarea,
+select {
+  transition: border-color var(--duration-fast, 140ms) var(--ease-standard, ease);
+}
+
+input:focus,
 input:focus-visible,
+textarea:focus,
 textarea:focus-visible,
+select:focus,
 select:focus-visible {
+  border-color: var(--color-accent);
   outline: 0;
   box-shadow: none;
 }

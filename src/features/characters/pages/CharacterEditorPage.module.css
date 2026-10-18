@@ -97,6 +97,17 @@
   line-height: 1.6;
 }
 
+.field input:focus,
+.field input:focus-visible,
+.field select:focus,
+.field select:focus-visible,
+.field textarea:focus,
+.field textarea:focus-visible,
+.themeFields input:focus,
+.themeFields input:focus-visible {
+  border-color: var(--color-accent);
+}
+
 .imageControls button:focus-visible,
 .fileButton:focus-within {
   border-color: var(--color-focus-ring);

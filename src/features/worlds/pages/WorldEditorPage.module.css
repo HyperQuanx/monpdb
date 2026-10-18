@@ -50,6 +50,7 @@
   font-size: 1rem;
   line-height: 1.5;
   outline: 0;
+  transition: border-color var(--duration-fast) var(--ease-standard);
 }
 
 .control { padding-inline: var(--space-3); }
@@ -58,6 +59,13 @@
   min-height: 96px;
   padding: var(--space-3);
   resize: vertical;
+}
+
+.control:focus,
+.control:focus-visible,
+.textarea:focus,
+.textarea:focus-visible {
+  border-color: var(--color-accent);
 }
 
 .fieldError,

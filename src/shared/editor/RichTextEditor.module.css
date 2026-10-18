@@ -78,6 +78,10 @@
     box-shadow var(--duration-fast, 140ms) var(--ease-standard, ease);
 }
 
+.editorFrame:focus-within {
+  border-color: var(--color-accent, #202124);
+}
+
 .editorContent {
   min-height: 180px;
 }
