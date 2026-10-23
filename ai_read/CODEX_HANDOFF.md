@@ -7,6 +7,20 @@
 
 **페이지 스타일 조정 인수인계:** 다음 에이전트가 여러 페이지의 여백·입력폼·글자·카드 등을 미세 조정할 때는 [STYLE_HANDOFF.md](STYLE_HANDOFF.md)를 먼저 읽는다. 공통/페이지별 CSS 지도, 실제 route·fixture URL, 최근 포커스 제거 요구, 검증·Vercel 배포 방법을 정리했다.
 
+**2026-10-24 캐릭터 테마곡 오디오 업로드 및 플레이어 / 유튜브 영상 플레이어 추가:**
+- 프론트엔드 작업:
+  1. `src/features/characters/components/ThemeSongField.jsx` & `.module.css`: 테마곡 입력 필드에 오디오 파일(MP3, WAV, OGG, M4A 등, 최대 15MB) 직접 업로드 버튼 및 미리듣기, 삭제 기능 추가. 파일 선택 시 Base64 Data URL로 인코딩하여 `themeSong`에 저장.
+  2. `src/shared/media/CustomAudioPlayer.jsx` & `.module.css`: 기본 `<audio>` 컨트롤러 대신 원형 재생/일시정지 버튼, 슬라이더 탐색 바, 시간 표시, 음소거, 재생 중 통통 튀는 4단 이퀄라이저 애니메이션을 포함한 모던 커스텀 플레이어 구현.
+  3. `src/shared/media/ThemeSongPlayer.jsx` & `.module.css`: 캐릭터 상세 페이지의 '테마곡' 항목에서 유튜브 링크 감지 시 16:9 반응형 iframe 플레이어 임베드 및 외부 열기 버튼 렌더링, 오디오 소스 감지 시 커스텀 플레이어 렌더링.
+  4. `CharacterDetailPage.jsx`: 프로필 테이블에서 테마곡 항목을 `ThemeSongPlayer`로 렌더링.
+- 미니PC 백엔드(Spring Boot / MariaDB) 검토 및 인수인계:
+  1. 백엔드 스키마: 캐릭터 엔티티는 `monp_entry` 테이블의 `document LONGTEXT` 컬럼에 통째로 JSON으로 직렬화되어 저장되며, `schemas.json`의 `themeSong`은 `type: "string"`(길이 무제한)으로 정의되어 있음.
+  2. 따라서 **유튜브 링크 입력 시**에는 백엔드 코드 수정이 전혀 불필요함.
+  3. **오디오 파일 업로드 시**: 현재는 Base64 Data URL로 전송되므로 원칙적으로 백엔드 코드 수정 없이도 저장이 가능하나, 용량이 큰 음원(수 MB 이상)을 업로드할 경우 Caddy 리버스 프록시 요청 본문 제한, Tomcat 수신 제한, MariaDB `max_allowed_packet`, 그리고 목록 조회 시 응답 페이로드가 커지는 문제가 발생할 수 있음.
+  4. 미니PC 접속 후 권장 대응:
+     - (옵션 A) 1~3MB 내외의 가벼운 음원 및 유튜브 영상 링크 위주로 활용할 경우: 백엔드 코드 변경 불필요.
+     - (옵션 B) 고음질/대용량 오디오를 안전하게 관리하려는 경우: 기존 `ImageController`(`/api/v1/images`, `/var/lib/monp-api/uploads` 저장)와 유사하게 오디오 전용 멀티파트 업로드 API(`AudioController` 또는 `/api/v1/audio`)를 백엔드에 추가하고, 프론트엔드에서 업로드 후 발급받은 URL을 `themeSong`에 저장하도록 확장 고려.
+
 **2026-10-18 입력폼 포커스 표시 제거:** 사용자 요청으로 공통 input/textarea/select의 파란 그림자와 캐릭터·세계관·플롯·설정·아이디어·메모·일반 콘텐츠 편집폼의 포커스 테두리 변경을 제거했다. 공통 리치 텍스트 본문 frame의 포커스 그림자도 제거했다. 버튼/링크의 기존 키보드 focus는 유지한다. lint/build 및 모바일 크기 Chromium에서 캐릭터 이름·지역·요약·본문의 focus 전후 테두리/outline/shadow, 페이지 오류 0 확인. Vercel production `FqEoxYoWrBHjkeXeTfzpaAY7DwFX` 배포 완료, 공개 주소의 공통·캐릭터 편집·본문 CSS가 검증된 빌드와 바이트 일치 확인. 로컬 검증 서버 종료, 운영 데이터/API 변경·Git commit/push 없음. 아래 2026-10-17 디자인 배포 ID는 이전 배포다.
 
 **사용자 외부 기기 테스트 진행 중(2026-10-18):** 접속은 문제없이 성공했다고 보고했다. 장치/회선 상세·조회/생성/수정/저장 유지 결과는 아직 미수신이며 접속 성공만 확인된 상태다.

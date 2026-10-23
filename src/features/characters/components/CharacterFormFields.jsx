@@ -7,6 +7,7 @@ import {
   characterLongFields,
   characterTextFields,
 } from "../characterForm";
+import ThemeSongField from "./ThemeSongField";
 import styles from "../pages/CharacterEditorPage.module.css";
 
 function CharacterFormFields({
@@ -81,27 +82,30 @@ function CharacterFormFields({
       </div>
 
       <div className={styles.grid}>
-        {characterTextFields.map(([key, label, required]) => (
-          <div className={styles.field} key={key}>
-            <label htmlFor={key}>
-              {label} {required ? <strong aria-hidden="true">*</strong> : null}
-            </label>
-            <input
-              aria-describedby={key === "name" && nameError ? nameErrorId : undefined}
-              aria-invalid={key === "name" ? Boolean(nameError) : undefined}
-              aria-label={label}
-              id={key}
-              ref={key === "name" ? nameRef : undefined}
-              value={draft[key]}
-              onChange={(event) => onChange(key, event.target.value)}
-            />
-            {key === "name" && nameError ? (
-              <span className={styles.fieldError} id={nameErrorId} role="alert">
-                {nameError}
-              </span>
-            ) : null}
-          </div>
-        ))}
+        {characterTextFields
+          .filter(([key]) => key !== "themeSong")
+          .map(([key, label, required]) => (
+            <div className={styles.field} key={key}>
+              <label htmlFor={key}>
+                {label} {required ? <strong aria-hidden="true">*</strong> : null}
+              </label>
+              <input
+                aria-describedby={key === "name" && nameError ? nameErrorId : undefined}
+                aria-invalid={key === "name" ? Boolean(nameError) : undefined}
+                aria-label={label}
+                id={key}
+                ref={key === "name" ? nameRef : undefined}
+                value={draft[key]}
+                onChange={(event) => onChange(key, event.target.value)}
+              />
+              {key === "name" && nameError ? (
+                <span className={styles.fieldError} id={nameErrorId} role="alert">
+                  {nameError}
+                </span>
+              ) : null}
+            </div>
+          ))}
+        <ThemeSongField value={draft.themeSong} onChange={onChange} />
       </div>
 
       <div className={styles.grid}>

@@ -12,6 +12,7 @@ import {
 } from "../../../data/repositories/appRepositories";
 import { Button, Skeleton } from "../../../shared/ui";
 import { relationCandidatePath } from "../../../shared/relations/relationDrafts";
+import ThemeSongPlayer from "../../../shared/media/ThemeSongPlayer";
 import { getReadableTextColor, sameEndpoint } from "../characterForm";
 import CharacterPortrait from "../components/CharacterPortrait";
 import styles from "./CharacterDetailPage.module.css";
@@ -211,7 +212,16 @@ function CharacterDetailContent({
         {profileFields.map(([key, label, value]) => (
           <div className={styles.profileRow} key={key}>
             <dt>{label}</dt>
-            <dd>{displayValue(value)}</dd>
+            <dd>
+              {key === "themeSong" ? (
+                <ThemeSongPlayer
+                  characterName={character.name}
+                  value={value}
+                />
+              ) : (
+                displayValue(value)
+              )}
+            </dd>
           </div>
         ))}
       </dl>

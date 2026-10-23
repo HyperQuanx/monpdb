@@ -17,6 +17,19 @@
 
 ## 최근 스타일 수정 이력
 
+### 2026-10-24 캐릭터 테마곡 오디오 업로드 및 커스텀 플레이어 / 유튜브 영상 플레이어 추가
+- **테마곡 입력/업로드 필드 (`ThemeSongField`)**:
+  - 캐릭터 추가 및 편집 페이지(`CharacterEditorPage`)에서 테마곡 필드에 유튜브 URL/곡명 텍스트 입력뿐만 아니라 오디오 파일(MP3, WAV, OGG, M4A, AAC, FLAC, 최대 15MB) 직접 업로드 버튼 및 삭제 버튼 제공.
+  - 업로드된 파일은 `FileReader.readAsDataURL`을 통해 base64 data URL로 안전하게 직렬화하여 기존 백엔드/스키마 변경 없이 `themeSong`에 저장 및 즉시 미리듣기 지원.
+- **차별화된 커스텀 오디오 플레이어 (`CustomAudioPlayer`)**:
+  - 기본 브라우저 `<audio>` 컨트롤러 대신 짙은 차콜/슬레이트 톤의 독창적이고 모던한 커스텀 UI 제작.
+  - 세련된 원형 재생/일시정지 토글 버튼, 곡명 타이틀, 부드러운 호버 슬라이더(재생 위치 탐색), 현재 시간 / 전체 시간 포맷 표시, 음소거 토글 버튼, 오디오 재생 중 통통 튀는 4단 이퀄라이저 애니메이션 바 탑재.
+- **테마곡 미디어 라우터 플레이어 (`ThemeSongPlayer`)**:
+  - 캐릭터 상세 페이지(`CharacterDetailPage`)의 프로필 표 '테마곡' 행에서 자동 감지 렌더링.
+  - 유튜브 링크(`youtu.be`, `youtube.com/watch`, `shorts`) 감지 시: 16:9 비율의 반응형 iframe 영상 임베드 플레이어 + 외부 링크 버튼 렌더링.
+  - 업로드된 오디오 소스(Data URL 또는 오디오 파일 링크) 감지 시: 커스텀 오디오 플레이어 렌더링.
+  - 일반 텍스트나 일반 웹 링크일 경우: 안전한 텍스트 또는 새 탭 열기 링크로 렌더링.
+
 ### 2026-10-19 캐릭터 상세 페이지 (`CharacterDetailPage`) 조정 (참고: `character방법.png`)
 - **시트와 프로필 표 밀착**: `<div className={styles.sheet}>`와 `<dl className={styles.profileTable}>`를 분리 유지한 채, `.sheet + .profileTable { margin-top: calc(var(--space-4) * -1); }`로 상단 그리드 gap을 상쇄하여 단일 카드 형태로 붙임.
 - **이름 헤더 스타일**: 이름 `1.25rem` 중앙 정렬, 한자/영문 `0.875rem` 볼드(`font-weight: 700`), 헤더 배경색 및 텍스트 색상을 캐릭터 라벨 테마(`--name-header-bg`, `--name-header-text`)와 연동(`color: inherit`).
