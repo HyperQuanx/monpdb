@@ -13,13 +13,26 @@
   2. `src/shared/media/CustomAudioPlayer.jsx` & `.module.css`: 기본 `<audio>` 컨트롤러 대신 원형 재생/일시정지 버튼, 슬라이더 탐색 바, 시간 표시, 음소거, 재생 중 통통 튀는 4단 이퀄라이저 애니메이션을 포함한 모던 커스텀 플레이어 구현.
   3. `src/shared/media/ThemeSongPlayer.jsx` & `.module.css`: 캐릭터 상세 페이지의 '테마곡' 항목에서 유튜브 링크 감지 시 16:9 반응형 iframe 플레이어 임베드 및 외부 열기 버튼 렌더링, 오디오 소스 감지 시 커스텀 플레이어 렌더링.
   4. `CharacterDetailPage.jsx`: 프로필 테이블에서 테마곡 항목을 `ThemeSongPlayer`로 렌더링.
-- 미니PC 백엔드(Spring Boot / MariaDB) 검토 및 인수인계:
-  1. 백엔드 스키마: 캐릭터 엔티티는 `monp_entry` 테이블의 `document LONGTEXT` 컬럼에 통째로 JSON으로 직렬화되어 저장되며, `schemas.json`의 `themeSong`은 `type: "string"`(길이 무제한)으로 정의되어 있음.
-  2. 따라서 **유튜브 링크 입력 시**에는 백엔드 코드 수정이 전혀 불필요함.
-  3. **오디오 파일 업로드 시**: 현재는 Base64 Data URL로 전송되므로 원칙적으로 백엔드 코드 수정 없이도 저장이 가능하나, 용량이 큰 음원(수 MB 이상)을 업로드할 경우 Caddy 리버스 프록시 요청 본문 제한, Tomcat 수신 제한, MariaDB `max_allowed_packet`, 그리고 목록 조회 시 응답 페이로드가 커지는 문제가 발생할 수 있음.
-  4. 미니PC 접속 후 권장 대응:
-     - (옵션 A) 1~3MB 내외의 가벼운 음원 및 유튜브 영상 링크 위주로 활용할 경우: 백엔드 코드 변경 불필요.
-     - (옵션 B) 고음질/대용량 오디오를 안전하게 관리하려는 경우: 기존 `ImageController`(`/api/v1/images`, `/var/lib/monp-api/uploads` 저장)와 유사하게 오디오 전용 멀티파트 업로드 API(`AudioController` 또는 `/api/v1/audio`)를 백엔드에 추가하고, 프론트엔드에서 업로드 후 발급받은 URL을 `themeSong`에 저장하도록 확장 고려.
+- **백엔드 에러 원인 분석 (`character.themeSong is too long`)**:
+  - 발생 지점: `back/src/main/java/shop/qbixportfolio/monp/core/Contracts.java` 라인 56
+    ```java
+    if (value instanceof String s) {
+        if (s.length() > 200_000) invalid(path + " is too long.");
+    ```
+  - 모든 문자열 필드에 200,000자(20만 자) 하드코딩 검증이 적용되어 있어, 3MB 오디오 파일(Base64 인코딩 시 약 400만 자) 전송 시 `character.themeSong is too long.` 예외 발생.
+  - `monp_entry` 테이블 자체는 `document LONGTEXT` (4GB)이므로 DB 용량 문제는 아님.
+- **미니PC 백엔드 작업 방법 (2가지 중 선택)**:
+  - **방법 1 (가장 간단하고 빠른 수정 - Contracts 길이 예외 처리)**:
+    - `back/src/main/java/shop/qbixportfolio/monp/core/Contracts.java`의 라인 56을 수정하여 `themeSong` 필드만 25,000,000자(25MB)까지 허용:
+      ```java
+      int limit = path.endsWith("themeSong") ? 25_000_000 : 200_000;
+      if (s.length() > limit) invalid(path + " is too long.");
+      ```
+    - 미니PC Caddy/Tomcat의 요청 본문 크기 제한 및 MariaDB `max_allowed_packet` 확인 필요.
+  - **방법 2 (정석적인 아키텍처 - 오디오 업로드 API 추가)**:
+    - 기존 `ImageController.java`(`/api/v1/images`, `/var/lib/monp-api/uploads` 저장)와 동일한 패턴으로 `AudioController.java`(`/api/v1/audio`) 멀티파트 엔드포인트를 추가하여 파일을 서버에 저장하고 URL(`/api/v1/audio/{id}`)을 반환하도록 구현.
+- **미니PC AI 채팅 프롬프트**:
+  > "백엔드에서 캐릭터 테마곡에 오디오 파일을 업로드할 때 `character.themeSong is too long.` 에러가 발생합니다. 원인은 `shop.qbixportfolio.monp.core.Contracts.java`의 `if (s.length() > 200_000) invalid(path + \" is too long.\");` 로직 때문입니다. `path.endsWith(\"themeSong\")`인 경우 최대 길이를 25,000,000으로 예외 처리해 주고, 필요한 경우 Tomcat/Spring 요청 본문 크기 설정을 확인해 줘."
 
 **2026-10-18 입력폼 포커스 표시 제거:** 사용자 요청으로 공통 input/textarea/select의 파란 그림자와 캐릭터·세계관·플롯·설정·아이디어·메모·일반 콘텐츠 편집폼의 포커스 테두리 변경을 제거했다. 공통 리치 텍스트 본문 frame의 포커스 그림자도 제거했다. 버튼/링크의 기존 키보드 focus는 유지한다. lint/build 및 모바일 크기 Chromium에서 캐릭터 이름·지역·요약·본문의 focus 전후 테두리/outline/shadow, 페이지 오류 0 확인. Vercel production `FqEoxYoWrBHjkeXeTfzpaAY7DwFX` 배포 완료, 공개 주소의 공통·캐릭터 편집·본문 CSS가 검증된 빌드와 바이트 일치 확인. 로컬 검증 서버 종료, 운영 데이터/API 변경·Git commit/push 없음. 아래 2026-10-17 디자인 배포 ID는 이전 배포다.
 
